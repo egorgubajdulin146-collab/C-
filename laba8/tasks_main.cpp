@@ -54,6 +54,7 @@ int main(int argc, char** argv) {
         }
         case 3:
             // Для задачи 3: только cin/cout (без файлов).
+            cout << "Введите длину числа и систему счисления" << endl;
             solveKNumbers(cin, cout);
             break;
         default:

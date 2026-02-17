@@ -5,23 +5,28 @@
 
 //ункция подсчета K-ичных чисел длины N
 long double countKNumbers(int N, int K) {
-    long double dp[21][5] = {};
+    long long int nz, _nz, oz, _oz, tz, _tz, trz, _trz, fz, _fz;
 
-    dp[1][0] = K - 1; 
-
-    for (int i = 1; i < N; ++i) {
-        for (int j = 0; j < 4; ++j) {
-            dp[i+1][0] += dp[i][j] * (K - 1);
-        }
-        
-        for (int j = 0; j < 3; ++j) {
-            dp[i+1][j+1] += dp[i][j];
-        }
-        
-        dp[i+1][4] = dp[i][4] * K + dp[i][3]; 
+    nz = K - 1;
+    oz = 1;
+    tz = 0;
+    trz = 0;
+    fz = 0;
+    for(int i = 2; i <= N; i++){
+        _nz = nz;
+        _oz = oz;
+        _tz = tz;
+        _trz = trz;
+        _fz = fz;
+        nz = _nz * (K - 1) + _oz * (K - 1) + _tz * (K - 1) + _trz * (K - 1);
+        oz = _nz;
+        tz = _oz;
+        trz = _tz;
+        fz = _fz * K + _trz;
     }
 
-    return dp[N][4];
+    return fz;
+
 }
 
 void solveKNumbers(std::istream& in, std::ostream& out) {
@@ -30,7 +35,7 @@ void solveKNumbers(std::istream& in, std::ostream& out) {
     if (!(in >> N >> K)) return;
 
     long double ans = countKNumbers(N, K);
-
+    cout << "Ответ: ";
     out << fixed << setprecision(0) << ans << '\n';
 }
 
