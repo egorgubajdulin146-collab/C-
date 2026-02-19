@@ -3,6 +3,54 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+void create_tests() {
+    using namespace std;
+
+    ofstream f1("f9.bin", ios::binary);
+    double d9[] = {1.1, 2.2, 3.3, 4.4, 10.5}; 
+    for(double d : d9) f1.write((char*)&d, sizeof(double));
+    f1.close();
+
+    ofstream f2("f32.bin", ios::binary);
+    int i32[] = {1, 2, 3, 100, 200, 300};
+    for(int i : i32) f2.write((char*)&i, sizeof(int));
+    f2.close();
+
+    double v1[] = {9.0, 6.0}, v2[] = {8.0, 5.0}, v3[] = {7.0, 4.0};
+    ofstream s1("s1.bin", ios::binary), s2("s2.bin", ios::binary), s3("s3.bin", ios::binary);
+    for(double d : v1) s1.write((char*)&d, sizeof(double));
+    for(double d : v2) s2.write((char*)&d, sizeof(double));
+    for(double d : v3) s3.write((char*)&d, sizeof(double));
+    s1.close(); s2.close(); s3.close();
+
+    cout << "Тестовые бинарные файлы (f9.bin, f32.bin, s1.bin, s2.bin, s3.bin) созданы!" << endl;
+}
+
+void print_file_double(std::string name) {
+    using namespace std;
+    ifstream in(name, ios::binary);
+    if (!in) { cout << "Файл не открыт!" << endl; return; }
+    double val;
+    cout << "Содержимое " << name << ": ";
+    while (in.read((char*)&val, sizeof(double))) {
+        cout << val << " ";
+    }
+    cout << endl;
+    in.close();
+}
+
+void print_file_int(std::string name) {
+    using namespace std;
+    ifstream in(name, ios::binary);
+    if (!in) { cout << "Файл не открыт!" << endl; return; }
+    int val;
+    cout << "Содержимое " << name << ": ";
+    while (in.read((char*)&val, sizeof(int))) {
+        cout << val << " ";
+    }
+    cout << endl;
+    in.close();
+}
 
 void file9(){
     using namespace std;
@@ -17,27 +65,33 @@ void file9(){
         cout << "Ошибка открытия файла!" << endl;
         return;
     }
+    double first, last;
 
-    double first, last, current;
-    // Сначала читаем самый первый элемент
     if (!in.read((char*)&first, sizeof(double))) {
         cout << "Файл пуст!" << endl;
         return;
     }
 
-    last = first; // На случай, если в файле только одно число
-    // В цикле читаем все числа до конца, последнее окажется в last
-    while (in.read((char*)&current, sizeof(double))) {
-        last = current;
+    in.seekg(-(int)sizeof(double), ios::end); 
+    
+    if (!in.read((char*)&last, sizeof(double))) {
+        last = first;
     }
+
     in.close();
 
     ofstream out(f_new, ios::binary);
-    out.write((char*)&last, sizeof(double));  // Пишем последнее
-    out.write((char*)&first, sizeof(double)); // Пишем первое
-    out.close();
-    cout << "Готово! Записаны числа: " << last << " и " << first << endl;
+    if (out) {
+        out.write((char*)&last, sizeof(double));  
+        out.write((char*)&first, sizeof(double)); 
+        out.close();
+        cout << "Готово! Записаны числа: " << last << " и " << first << endl;
+    }
+    print_file_double(f_exist);
+    print_file_double(f_new);
 }
+
+
 
 
 void file32(){
@@ -45,6 +99,9 @@ void file32(){
     string fname;
     cout << "Введите имя файла: ";
     cin >> fname;
+
+    cout << "--- Файл до удаления половины ---" << endl;
+    print_file_int(fname);
 
     ifstream in(fname, ios::binary);
     if (!in){
@@ -63,12 +120,14 @@ void file32(){
 
         }
         out.close();
-        cout << "Первая половина элементов удалена." << endl;
+        cout << "Файл после удаления первой половины" << endl;
+        print_file_int(fname); 
 
 }
 
-void file51(){
+void file51() {
     using namespace std;
+
     string s1, s2, s3, s4;
     cout << "Введите имена 3-х исходных файлов и финальный: ";
     cin >> s1 >> s2 >> s3 >> s4;
@@ -76,23 +135,28 @@ void file51(){
     vector<double> all_data;
     string names[] = {s1, s2, s3};
 
-    for(int i = 0; i < 3; i++){
+    cout << "--- Содержимое исходных файлов ---" << endl;
+    for(int i = 0; i < 3; i++) {
+        print_file_double(names[i]);
+    }
+
+    for(int i = 0; i < 3; i++) {
         ifstream in(names[i], ios::binary);
         double val;
-        while(in.read((char*)&val, sizeof(double))){
+        while(in.read((char*)&val, sizeof(double))) {
             all_data.push_back(val);
         }
         in.close();
     }
 
-    sort(all_data.begin(), all_data.end(), greater<double>());
-
     ofstream out(s4, ios::binary);
-    for(double d : all_data){
+    for(double d : all_data) {
         out.write((char*)&d, sizeof(double));
     }
     out.close();
-    cout << "Файлы объединены в " << s4 << endl;
+
+    cout << "--- Объединенный результат ---" << endl;
+    print_file_double(s4); 
 }
 int term(std::string& s){
     int last = s.back() - '0';
@@ -133,52 +197,4 @@ void recur15(){
     cout << "Введите выражение (цифры и знаки +, -, *): ";
     cin >> expr;
     cout << "Результат вычисления: " << Pl_or_mi(expr) << endl;
-}
-void print_file_double(std::string name) {
-    using namespace std;
-    ifstream in(name, ios::binary);
-    if (!in) { cout << "Файл не открыт!" << endl; return; }
-    double val;
-    cout << "Содержимое " << name << ": ";
-    while (in.read((char*)&val, sizeof(double))) {
-        cout << val << " ";
-    }
-    cout << endl;
-    in.close();
-}
-
-void print_file_int(std::string name) {
-    using namespace std;
-    ifstream in(name, ios::binary);
-    if (!in) { cout << "Файл не открыт!" << endl; return; }
-    int val;
-    cout << "Содержимое " << name << ": ";
-    while (in.read((char*)&val, sizeof(int))) {
-        cout << val << " ";
-    }
-    cout << endl;
-    in.close();
-}
-
-void create_tests() {
-    using namespace std;
-
-    ofstream f1("f9.bin", ios::binary);
-    double d9[] = {1.1, 2.2, 3.3, 4.4, 10.5}; 
-    for(double d : d9) f1.write((char*)&d, sizeof(double));
-    f1.close();
-
-    ofstream f2("f32.bin", ios::binary);
-    int i32[] = {1, 2, 3, 100, 200, 300};
-    for(int i : i32) f2.write((char*)&i, sizeof(int));
-    f2.close();
-
-    double v1[] = {9.0, 8.0}, v2[] = {2.0, 6.0}, v3[] = {5.0, 4.0};
-    ofstream s1("s1.bin", ios::binary), s2("s2.bin", ios::binary), s3("s3.bin", ios::binary);
-    for(double d : v1) s1.write((char*)&d, sizeof(double));
-    for(double d : v2) s2.write((char*)&d, sizeof(double));
-    for(double d : v3) s3.write((char*)&d, sizeof(double));
-    s1.close(); s2.close(); s3.close();
-
-    cout << "Тестовые бинарные файлы (f9.bin, f32.bin, s1.bin, s2.bin, s3.bin) созданы!" << endl;
 }
