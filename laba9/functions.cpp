@@ -91,16 +91,13 @@ void file9(){
     print_file_double(f_new);
 }
 
-
-
-
 void file32(){
     using namespace std;
     string fname;
     cout << "Введите имя файла: ";
     cin >> fname;
 
-    cout << "--- Файл до удаления половины ---" << endl;
+    cout << "Файл до удаления половины" << endl;
     print_file_int(fname);
 
     ifstream in(fname, ios::binary);
@@ -132,30 +129,42 @@ void file51() {
     cout << "Введите имена 3-х исходных файлов и финальный: ";
     cin >> s1 >> s2 >> s3 >> s4;
 
-    vector<double> all_data;
-    string names[] = {s1, s2, s3};
-
-    cout << "--- Содержимое исходных файлов ---" << endl;
-    for(int i = 0; i < 3; i++) {
-        print_file_double(names[i]);
-    }
-
-    for(int i = 0; i < 3; i++) {
-        ifstream in(names[i], ios::binary);
-        double val;
-        while(in.read((char*)&val, sizeof(double))) {
-            all_data.push_back(val);
-        }
-        in.close();
-    }
-
+    ifstream f1(s1, ios::binary);
+    ifstream f2(s2, ios::binary);
+    ifstream f3(s3, ios::binary);
     ofstream out(s4, ios::binary);
-    for(double d : all_data) {
-        out.write((char*)&d, sizeof(double));
-    }
-    out.close();
+    print_file_double(s1);
+    print_file_double(s2);
+    print_file_double(s3);
+    print_file_double(s4);
 
-    cout << "--- Объединенный результат ---" << endl;
+    double v1, v2, v3;
+    bool has1 = bool(f1.read((char*)&v1, sizeof(double)));
+    bool has2 = bool(f2.read((char*)&v2, sizeof(double)));
+    bool has3 = bool(f3.read((char*)&v3, sizeof(double)));
+
+    while (has1 || has2 || has3) {
+        double max_val;
+        if (has1 && (!has2 || v1 >= v2) && (!has3 || v1 >= v3)) {
+            max_val = v1;
+            out.write((char*)&max_val, sizeof(double));
+            has1 = bool(f1.read((char*)&v1, sizeof(double)));
+        } 
+        else if (has2 && (!has3 || v2 >= v3)) {
+            max_val = v2;
+            out.write((char*)&max_val, sizeof(double));
+            has2 = bool(f2.read((char*)&v2, sizeof(double)));
+        } 
+        else if (has3) {
+            max_val = v3;
+            out.write((char*)&max_val, sizeof(double));
+            has3 = bool(f3.read((char*)&v3, sizeof(double)));
+        }
+    }
+
+    f1.close(); f2.close(); f3.close(); out.close();
+
+    cout << "Файлы проанализированы и объединены по убыванию." << endl;
     print_file_double(s4); 
 }
 int term(std::string& s){
