@@ -1,7 +1,6 @@
 #include "funcion.h"
 #include <fstream>
 #include <iostream>
-using namespace std;
 
 //добавить элемент в вершину стека
 void push(PNode& top, int value){
@@ -25,6 +24,7 @@ bool pop(PNode& top, int& value){
 
 //вывести стек от вершины к низу
 void printstack(PNode top){
+    using namespace std;
     cout << "stack: ";
     while(top){
         cout << top->data << ' ';
@@ -63,7 +63,7 @@ bool dequeue(Queue& q, int& value){
     PNode p = q.head;
     value = p->data;
     q.head = q.head->next;
-    if(!q.head) q.head = nullptr;
+    if(!q.head) q.tail = nullptr;
 
     delete p;
     return true;
@@ -71,6 +71,7 @@ bool dequeue(Queue& q, int& value){
 
 //вывести очередь от head к tail
 void printqueue(const Queue& q){
+    using namespace std;
     cout << "queue: ";
     PNode p = q.head;
     while(p){
@@ -106,6 +107,7 @@ void pushback(PNode& head, PNode& tail, int value){
 
 //вывести список от головы к концу
 void printlist(PNode head){
+    using namespace std;
     cout << "list: ";
     while(head){
         cout << head->data << ' ';
@@ -123,8 +125,229 @@ void clearlist(PNode& head){
     }
 }
 
+void fillStack(PNode& top, int minN) {
+    using namespace std;
+    int method = 0;
+    cout << "Способ заполнения стека: 1-клавиатура, 2-файл, 3-случайно: ";
+    cin >> method;
+
+    int n = 0;
+
+    if (method == 1) {
+        cout << "Введите количество элементов: ";
+        cin >> n;
+        if (n < minN) {
+            cout << "Нужно минимум " << minN << " элементов\n";
+            return;
+        }
+
+        cout << "Введите " << n << " чисел: ";
+        for (int i = 0; i < n; ++i) {
+            int x;
+            cin >> x;
+            push(top, x);
+        }
+    } else if (method == 2) {
+        string fileName;
+        cout << "Введите имя файла: ";
+        cin >> fileName;
+        ifstream fin(fileName);
+        if (!fin.is_open()) {
+            cout << "Не удалось открыть файл\n";
+            return;
+        }
+
+        fin >> n;
+        if (n < minN) {
+            cout << "В файле меньше чем " << minN << " элементов\n";
+            return;
+        }
+
+        for (int i = 0; i < n; ++i) {
+            int x;
+            fin >> x;
+            push(top, x);
+        }
+    } else if (method == 3) {
+        int l, r;
+        cout << "Введите количество элементов: ";
+        cin >> n;
+        if (n < minN) {
+            cout << "Нужно минимум " << minN << " элементов\n";
+            return;
+        }
+
+        cout << "Введите диапазон [L R]: ";
+        cin >> l >> r;
+        if (l > r) {
+            int t = l;
+            l = r;
+            r = t;
+        }
+
+        cout << "Сгенерировано: ";
+        for (int i = 0; i < n; ++i) {
+            int x = l + rand() % (r - l + 1);
+            cout << x << ' ';
+            push(top, x);
+        }
+        cout << '\n';
+    } else {
+        cout << "Неверный способ\n";
+    }
+}
+
+void fillQueue(Queue& q) {
+    using namespace std;
+    int method = 0;
+    cout << "Способ заполнения очереди: 1-клавиатура, 2-файл, 3-случайно: ";
+    cin >> method;
+
+    int n = 0;
+
+    if (method == 1) {
+        cout << "Введите количество элементов: ";
+        cin >> n;
+        cout << "Введите " << n << " чисел: ";
+        for (int i = 0; i < n; ++i) {
+            int x;
+            cin >> x;
+            enqueue(q, x);
+        }
+    } else if (method == 2) {
+        string fileName;
+        cout << "Введите имя файла: ";
+        cin >> fileName;
+        ifstream fin(fileName);
+        if (!fin.is_open()) {
+            cout << "Не удалось открыть файл\n";
+            return;
+        }
+
+        fin >> n;
+        for (int i = 0; i < n; ++i) {
+            int x;
+            fin >> x;
+            enqueue(q, x);
+        }
+    } else if (method == 3) {
+        int l, r;
+        cout << "Введите количество элементов: ";
+        cin >> n;
+        cout << "Введите диапазон [L R]: ";
+        cin >> l >> r;
+        if (l > r) {
+            int t = l;
+            l = r;
+            r = t;
+        }
+
+        cout << "Сгенерировано: ";
+        for (int i = 0; i < n; ++i) {
+            int x = l + rand() % (r - l + 1);
+            cout << x << ' ';
+            enqueue(q, x);
+        }
+        cout << '\n';
+    } else {
+        cout << "Неверный способ\n";
+    }
+}
+
+void fillList(PNode& head, PNode& tail, int minN) {
+    using namespace std;
+    int method = 0;
+    cout << "Способ заполнения списка: 1-клавиатура, 2-файл, 3-случайно: ";
+    cin >> method;
+
+    int n = 0;
+
+    if (method == 1) {
+        cout << "Введите количество элементов: ";
+        cin >> n;
+        if (n < minN) {
+            cout << "Нужно минимум " << minN << " элементов\n";
+            return;
+        }
+
+        cout << "Введите " << n << " чисел: ";
+        for (int i = 0; i < n; ++i) {
+            int x;
+            cin >> x;
+            pushback(head, tail, x);
+        }
+    } else if (method == 2) {
+        string fileName;
+        cout << "Введите имя файла: ";
+        cin >> fileName;
+        ifstream fin(fileName);
+        if (!fin.is_open()) {
+            cout << "Не удалось открыть файл\n";
+            return;
+        }
+
+        fin >> n;
+        if (n < minN) {
+            cout << "В файле меньше чем " << minN << " элементов\n";
+            return;
+        }
+
+        for (int i = 0; i < n; ++i) {
+            int x;
+            fin >> x;
+            pushback(head, tail, x);
+        }
+    } else if (method == 3) {
+        int l, r;
+        cout << "Введите количество элементов: ";
+        cin >> n;
+        if (n < minN) {
+            cout << "Нужно минимум " << minN << " элементов\n";
+            return;
+        }
+
+        cout << "Введите диапазон [L R]: ";
+        cin >> l >> r;
+        if (l > r) {
+            int t = l;
+            l = r;
+            r = t;
+        }
+
+        cout << "Сгенерировано: ";
+        for (int i = 0; i < n; ++i) {
+            int x = l + rand() % (r - l + 1);
+            cout << x << ' ';
+            pushback(head, tail, x);
+        }
+        cout << '\n';
+    } else {
+        cout << "Неверный способ\n";
+    }
+}
+
+//вставка значения в список по убыванию
+void sortik(PNode& head, int value){
+    PNode p = new Node(value);
+
+    if(!head || value > head->data){
+        p->next = head;
+        head = p;
+        return;
+    }
+
+    PNode cur = head;
+    while(cur-> next && cur->next->data >= value){
+        cur = cur->next;
+    }
+
+    p->next = cur->next;
+    cur->next = p;
+}
+
 //снять 9 верхних элементов стека и вывести новый P2
 void dynamic6(PNode& top){
+    using namespace std;
     cout << "Извлекаем 9 элементов: ";
     for(int i = 0; i < 9; i++){
         int x;
@@ -166,4 +389,50 @@ PNode listWork4(PNode head){
     return head;
 }
 
+//вставить M перед каждым вторым элементом, вернуть хвост P2
+PNode listWork25(PNode& head, int m){
+    if(!head || !head->next) return head;
 
+    PNode prew = head;
+    PNode curr = head->next;
+    int pos = 2;
+
+    while(curr){
+        if(pos % 2 == 0){
+            PNode ins = new Node(m);
+            prew->next = ins;
+            ins->next = curr;
+
+            prew = curr;
+            curr = curr->next;
+            pos++;
+        }
+        else{
+            prew = curr;
+            curr = curr->next;
+            pos++;
+        }
+    }
+
+    PNode tail = head;
+    while(tail && tail->next) tail = tail->next;
+    return tail;
+}
+
+//прочитать N чисел из файла и собрать список по убыванию
+bool listWork62(const std::string& filename, PNode& head){
+    using namespace std;
+    ifstream fin(filename);
+    if(!fin.is_open()) return false;
+
+    int n;
+    fin >> n;
+
+    for(int i = 0; i < n; i++){
+        int x;
+        fin >> x;
+        sortik(head, x);
+    }
+
+    return true;
+}

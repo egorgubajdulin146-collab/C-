@@ -33,15 +33,16 @@ void clearqueue(Queue& q);
 void pushback(PNode& head, PNode& tail, int value);
 void printlist(PNode head);
 void clearlist(PNode& head);
+void sortik(PNode& head, int value);
+void fillStack(PNode& top, int minN);
+void fillQueue(Queue& q);
+void fillList(PNode& head, PNode& tail, int minN);
 
 void dynamic6(PNode& top);
 
-
 void dynamic21(Queue& first, Queue& second);
 
-
 PNode listWork4(PNode head);
-
 
 PNode listWork25(PNode& head, int m);
 
