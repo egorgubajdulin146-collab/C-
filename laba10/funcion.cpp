@@ -1,437 +1,604 @@
 #include "funcion.h"
+
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 
-//добавить элемент в вершину стека
-void push(PNode& top, int value){
-    PNode p = new Node(value);
-    p->next = top;
-    top = p;
+using namespace std;
+
+// создать пустой стек
+Stack::Stack() : top_(nullptr) {}
+
+// создать копию стека
+Stack::Stack(const Stack& other) : top_(nullptr) {
+    copyFrom(other);
 }
 
-//извлечь верхний элемент стека и вернуть его в value
+// присвоить один стек другому
+Stack& Stack::operator=(const Stack& other) {
+    if (this != &other) {
+        clear();
+        copyFrom(other);
+    }
+    return *this;
+}
 
-bool pop(PNode& top, int& value){
-    if(!top) return false;
+// удалить стек и освободить память
+Stack::~Stack() {
+    clear();
+}
 
-    PNode p = top;
+// скопировать данные из другого стека
+void Stack::copyFrom(const Stack& other) {
+    Node* rev = nullptr;
+    for (Node* p = other.top_; p != nullptr; p = p->next) {
+        rev = new Node(p->data, rev);
+    }
+
+    while (rev) {
+        push(rev->data);
+        Node* t = rev;
+        rev = rev->next;
+        delete t;
+    }
+}
+
+// добавить элемент в вершину стека
+void Stack::push(int value) {
+    top_ = new Node(value, top_);
+}
+
+// извлечь верхний элемент стека
+bool Stack::pop(int& value) {
+    if (!top_) return false;
+
+    Node* p = top_;
     value = p->data;
-    top = top->next;
+    top_ = top_->next;
     delete p;
     return true;
-
 }
 
-//вывести стек от вершины к низу
-void printstack(PNode top){
-    using namespace std;
-    cout << "stack: ";
-    while(top){
-        cout << top->data << ' ';
-        top = top->next;
+// найти значение в стеке
+bool Stack::find(int value) const {
+    for (Node* p = top_; p != nullptr; p = p->next) {
+        if (p->data == value) return true;
     }
-    cout << endl;
+    return false;
 }
 
-//очистить стек и освободить память
-void clearstack(PNode& top){
-    while(top){
-        PNode p = top;
-        top = top->next;
+// проверить, пуст ли стек
+bool Stack::isEmpty() const {
+    return top_ == nullptr;
+}
+
+// очистить стек
+void Stack::clear() {
+    while (top_) {
+        Node* p = top_;
+        top_ = top_->next;
         delete p;
     }
 }
 
-//добавить элемент в конец очереди
-void enqueue(Queue& q, int value){
-    PNode p = new Node(value);
-
-    if(!q.head){
-        q.head = p;
-        q.tail = p;
+// вывести стек
+void Stack::print() const {
+    cout << "stack: ";
+    for (Node* p = top_; p != nullptr; p = p->next) {
+        cout << p->data << ' ';
     }
-    else{
-        q.tail->next = p;
-        q.tail = p;
+    cout << '\n';
+}
+
+// получить адрес вершины стека
+const void* Stack::topAddress() const {
+    return static_cast<const void*>(top_);
+}
+
+// заполнить стек с клавиатуры
+bool Stack::fillKeyboard(int minN) {
+    clear();
+
+    int n = 0;
+    cout << "Введите количество элементов: ";
+    cin >> n;
+    if (n < minN) return false;
+
+    cout << "Введите " << n << " чисел: ";
+    for (int i = 0; i < n; ++i) {
+        int x;
+        cin >> x;
+        push(x);
+    }
+
+    return true;
+}
+
+// заполнить стек из файла
+bool Stack::fillFile(const string& fileName, int minN) {
+    clear();
+
+    ifstream fin(fileName);
+    if (!fin.is_open()) return false;
+
+    int n = 0;
+    fin >> n;
+    if (n < minN) return false;
+
+    for (int i = 0; i < n; ++i) {
+        int x;
+        fin >> x;
+        push(x);
+    }
+
+    return true;
+}
+
+// заполнить стек случайными числами
+bool Stack::fillRandom(int n, int l, int r, int minN) {
+    clear();
+
+    if (n < minN) return false;
+    if (l > r) {
+        int t = l;
+        l = r;
+        r = t;
+    }
+
+    cout << "Сгенерировано: ";
+    for (int i = 0; i < n; ++i) {
+        int x = l + rand() % (r - l + 1);
+        cout << x << ' ';
+        push(x);
+    }
+    cout << '\n';
+
+    return true;
+}
+
+// dynamic6: извлечь 9 верхних элементов стека
+void Stack::solveDynamic6() {
+    cout << "Извлекаем 9 элементов: ";
+    for (int i = 0; i < 9; ++i) {
+        int x;
+        if (!pop(x)) break;
+        cout << x << ' ';
+    }
+    cout << '\n';
+
+    if (top_) cout << "P2 = " << topAddress() << '\n';
+    else cout << "P2 = nullptr\n";
+}
+
+// создать пустую очередь
+QueueDS::QueueDS() : head_(nullptr), tail_(nullptr) {}
+
+// создать копию очереди
+QueueDS::QueueDS(const QueueDS& other) : head_(nullptr), tail_(nullptr) {
+    copyFrom(other);
+}
+
+// присвоить одну очередь другой
+QueueDS& QueueDS::operator=(const QueueDS& other) {
+    if (this != &other) {
+        clear();
+        copyFrom(other);
+    }
+    return *this;
+}
+
+// удалить очередь и освободить память
+QueueDS::~QueueDS() {
+    clear();
+}
+
+// скопировать данные из другой очереди
+void QueueDS::copyFrom(const QueueDS& other) {
+    for (Node* p = other.head_; p != nullptr; p = p->next) {
+        enqueue(p->data);
     }
 }
 
-//удалить элемент из начала очереди и вернуть его в value
-bool dequeue(Queue& q, int& value){
-    if(!q.head) return false;
+// добавить элемент в конец очереди
+void QueueDS::enqueue(int value) {
+    Node* p = new Node(value);
 
-    PNode p = q.head;
+    if (!head_) {
+        head_ = tail_ = p;
+    } else {
+        tail_->next = p;
+        tail_ = p;
+    }
+}
+
+// удалить элемент из начала очереди
+bool QueueDS::dequeue(int& value) {
+    if (!head_) return false;
+
+    Node* p = head_;
     value = p->data;
-    q.head = q.head->next;
-    if(!q.head) q.tail = nullptr;
+    head_ = head_->next;
+    if (!head_) tail_ = nullptr;
 
     delete p;
     return true;
 }
 
-//вывести очередь от head к tail
-void printqueue(const Queue& q){
-    using namespace std;
+// найти значение в очереди
+bool QueueDS::find(int value) const {
+    for (Node* p = head_; p != nullptr; p = p->next) {
+        if (p->data == value) return true;
+    }
+    return false;
+}
+
+// проверить, пуста ли очередь
+bool QueueDS::isEmpty() const {
+    return head_ == nullptr;
+}
+
+// очистить очередь
+void QueueDS::clear() {
+    while (head_) {
+        Node* p = head_;
+        head_ = head_->next;
+        delete p;
+    }
+    tail_ = nullptr;
+}
+
+// вывести очередь
+void QueueDS::print() const {
     cout << "queue: ";
-    PNode p = q.head;
-    while(p){
+    for (Node* p = head_; p != nullptr; p = p->next) {
         cout << p->data << ' ';
+    }
+    cout << '\n';
+}
+
+// получить адрес головы очереди
+const void* QueueDS::headAddress() const {
+    Node* p = head_;
+    int f= head_->data;
+    return static_cast<const void*>(f);
+}
+
+// получить адрес хвоста очереди
+const void* QueueDS::tailAddress() const {
+    return static_cast<const void*>(tail_);
+}
+
+// заполнить очередь с клавиатуры
+bool QueueDS::fillKeyboard() {
+    clear();
+
+    int n = 0;
+    cout << "Введите количество элементов: ";
+    cin >> n;
+    if (n < 0) return false;
+
+    cout << "Введите " << n << " чисел: ";
+    for (int i = 0; i < n; ++i) {
+        int x;
+        cin >> x;
+        enqueue(x);
+    }
+
+    return true;
+}
+
+// заполнить очередь из файла
+bool QueueDS::fillFile(const string& fileName) {
+    clear();
+
+    ifstream fin(fileName);
+    if (!fin.is_open()) return false;
+
+    int n = 0;
+    fin >> n;
+    if (n < 0) return false;
+
+    for (int i = 0; i < n; ++i) {
+        int x;
+        fin >> x;
+        enqueue(x);
+    }
+
+    return true;
+}
+
+// заполнить очередь случайными числами
+bool QueueDS::fillRandom(int n, int l, int r) {
+    clear();
+
+    if (n < 0) return false;
+    if (l > r) {
+        int t = l;
+        l = r;
+        r = t;
+    }
+
+    cout << "Сгенерировано: ";
+    for (int i = 0; i < n; ++i) {
+        int x = l + rand() % (r - l + 1);
+        cout << x << ' ';
+        enqueue(x);
+    }
+    cout << '\n';
+
+    return true;
+}
+
+// dynamic21: перенести все элементы первой очереди во вторую
+void QueueDS::moveAllTo(QueueDS& second) {
+    if (!head_) return;
+
+    if (!second.head_) {
+        second.head_ = head_;
+        second.tail_ = tail_;
+    } else {
+        second.tail_->next = head_;
+        second.tail_ = tail_;
+    }
+
+    head_ = nullptr;
+    tail_ = nullptr;
+}
+
+// создать пустой список
+SinglyList::SinglyList() : head_(nullptr), tail_(nullptr) {}
+
+// создать копию списка
+SinglyList::SinglyList(const SinglyList& other) : head_(nullptr), tail_(nullptr) {
+    copyFrom(other);
+}
+
+// присвоить один список другому
+SinglyList& SinglyList::operator=(const SinglyList& other) {
+    if (this != &other) {
+        clear();
+        copyFrom(other);
+    }
+    return *this;
+}
+
+// удалить список и освободить память
+SinglyList::~SinglyList() {
+    clear();
+}
+
+// скопировать данные из другого списка
+void SinglyList::copyFrom(const SinglyList& other) {
+    for (Node* p = other.head_; p != nullptr; p = p->next) {
+        pushBack(p->data);
+    }
+}
+
+// добавить элемент в конец списка
+void SinglyList::pushBack(int value) {
+    Node* p = new Node(value);
+
+    if (!head_) {
+        head_ = tail_ = p;
+    } else {
+        tail_->next = p;
+        tail_ = p;
+    }
+}
+
+// найти значение в списке
+bool SinglyList::find(int value) const {
+    for (Node* p = head_; p != nullptr; p = p->next) {
+        if (p->data == value) return true;
+    }
+    return false;
+}
+
+// удалить первое вхождение значения из списка
+bool SinglyList::removeFirst(int value) {
+    Node* prev = nullptr;
+    Node* cur = head_;
+
+    while (cur) {
+        if (cur->data == value) {
+            if (!prev) head_ = cur->next;
+            else prev->next = cur->next;
+
+            if (cur == tail_) tail_ = prev;
+            delete cur;
+            return true;
+        }
+        prev = cur;
+        cur = cur->next;
+    }
+
+    return false;
+}
+
+// проверить, пуст ли список
+bool SinglyList::isEmpty() const {
+    return head_ == nullptr;
+}
+
+// очистить список
+void SinglyList::clear() {
+    while (head_) {
+        Node* p = head_;
+        head_ = head_->next;
+        delete p;
+    }
+    tail_ = nullptr;
+}
+
+// вывести список
+void SinglyList::print() const {
+    cout << "list: ";
+    for (Node* p = head_; p != nullptr; p = p->next) {
+        cout << p->data << ' ';
+    }
+    cout << '\n';
+}
+
+// получить адрес головы списка
+const void* SinglyList::headAddress() const {
+    return static_cast<const void*>(head_);
+}
+
+// получить адрес хвоста списка
+const void* SinglyList::tailAddress() const {
+    return static_cast<const void*>(tail_);
+}
+
+// заполнить список с клавиатуры
+bool SinglyList::fillKeyboard(int minN) {
+    clear();
+
+    int n = 0;
+    cout << "Введите количество элементов: ";
+    cin >> n;
+    if (n < minN) return false;
+
+    cout << "Введите " << n << " чисел: ";
+    for (int i = 0; i < n; ++i) {
+        int x;
+        cin >> x;
+        pushBack(x);
+    }
+
+    return true;
+}
+
+// заполнить список из файла
+bool SinglyList::fillFile(const string& fileName, int minN) {
+    clear();
+
+    ifstream fin(fileName);
+    if (!fin.is_open()) return false;
+
+    int n = 0;
+    fin >> n;
+    if (n < minN) return false;
+
+    for (int i = 0; i < n; ++i) {
+        int x;
+        fin >> x;
+        pushBack(x);
+    }
+
+    return true;
+}
+
+// заполнить список случайными числами
+bool SinglyList::fillRandom(int n, int l, int r, int minN) {
+    clear();
+
+    if (n < minN) return false;
+    if (l > r) {
+        int t = l;
+        l = r;
+        r = t;
+    }
+
+    cout << "Сгенерировано: ";
+    for (int i = 0; i < n; ++i) {
+        int x = l + rand() % (r - l + 1);
+        cout << x << ' ';
+        pushBack(x);
+    }
+    cout << '\n';
+
+    return true;
+}
+
+// listwork4: получить адрес 5-го элемента
+const void* SinglyList::fifthAddress() const {
+    Node* p = head_;
+    for (int i = 1; i < 5 && p; ++i) {
         p = p->next;
     }
-    cout << endl;
+    return static_cast<const void*>(p);
 }
 
-//очистить очередь и освободить память
-void clearqueue(Queue& q){
-    while(q.head){
-        PNode p = q.head;
-        q.head = q.head->next;
-        delete p;
+// listwork4: получить значение 5-го элемента
+bool SinglyList::fifthValue(int& value) const {
+    Node* p = head_;
+    for (int i = 1; i < 5 && p; ++i) {
+        p = p->next;
     }
-    q.tail = nullptr;
+    if (!p) return false;
+    value = p->data;
+    return true;
 }
 
-//добавить элемент в конец односвязного списка
-void pushback(PNode& head, PNode& tail, int value){
-    PNode p = new Node(value);
+// listwork25: вставить M перед каждым вторым элементом
+void SinglyList::insertBeforeEachSecond(int m) {
+    if (!head_ || !head_->next) return;
 
-    if(!head){
-        head = p;
-        tail = p;
+    Node* prev = head_;
+    Node* curr = head_->next;
+    int pos = 2;
+
+    while (curr) {
+        if (pos % 2 == 0) {
+            Node* ins = new Node(m);
+            prev->next = ins;
+            ins->next = curr;
+
+            prev = curr;
+            curr = curr->next;
+            ++pos;
+        } else {
+            prev = curr;
+            curr = curr->next;
+            ++pos;
+        }
     }
-    else{
-        tail->next = p;
-        tail = p;
-    }
+
+    tail_ = head_;
+    while (tail_ && tail_->next) tail_ = tail_->next;
 }
 
-//вывести список от головы к концу
-void printlist(PNode head){
-    using namespace std;
-    cout << "list: ";
-    while(head){
-        cout << head->data << ' ';
-        head = head->next;
-    }
-    cout << endl;
-}
+// вставить элемент в список по убыванию
+void SinglyList::insertSortedDesc(int value) {
+    Node* p = new Node(value);
 
-//очистить список и освободить память
-void clearlist(PNode& head){
-    while(head){
-        PNode p = head;
-        head = head -> next;
-        delete p;
-    }
-}
-
-void fillStack(PNode& top, int minN) {
-    using namespace std;
-    int method = 0;
-    cout << "Способ заполнения стека: 1-клавиатура, 2-файл, 3-случайно: ";
-    cin >> method;
-
-    int n = 0;
-
-    if (method == 1) {
-        cout << "Введите количество элементов: ";
-        cin >> n;
-        if (n < minN) {
-            cout << "Нужно минимум " << minN << " элементов\n";
-            return;
-        }
-
-        cout << "Введите " << n << " чисел: ";
-        for (int i = 0; i < n; ++i) {
-            int x;
-            cin >> x;
-            push(top, x);
-        }
-    } else if (method == 2) {
-        string fileName;
-        cout << "Введите имя файла: ";
-        cin >> fileName;
-        ifstream fin(fileName);
-        if (!fin.is_open()) {
-            cout << "Не удалось открыть файл\n";
-            return;
-        }
-
-        fin >> n;
-        if (n < minN) {
-            cout << "В файле меньше чем " << minN << " элементов\n";
-            return;
-        }
-
-        for (int i = 0; i < n; ++i) {
-            int x;
-            fin >> x;
-            push(top, x);
-        }
-    } else if (method == 3) {
-        int l, r;
-        cout << "Введите количество элементов: ";
-        cin >> n;
-        if (n < minN) {
-            cout << "Нужно минимум " << minN << " элементов\n";
-            return;
-        }
-
-        cout << "Введите диапазон [L R]: ";
-        cin >> l >> r;
-        if (l > r) {
-            int t = l;
-            l = r;
-            r = t;
-        }
-
-        cout << "Сгенерировано: ";
-        for (int i = 0; i < n; ++i) {
-            int x = l + rand() % (r - l + 1);
-            cout << x << ' ';
-            push(top, x);
-        }
-        cout << '\n';
-    } else {
-        cout << "Неверный способ\n";
-    }
-}
-
-void fillQueue(Queue& q) {
-    using namespace std;
-    int method = 0;
-    cout << "Способ заполнения очереди: 1-клавиатура, 2-файл, 3-случайно: ";
-    cin >> method;
-
-    int n = 0;
-
-    if (method == 1) {
-        cout << "Введите количество элементов: ";
-        cin >> n;
-        cout << "Введите " << n << " чисел: ";
-        for (int i = 0; i < n; ++i) {
-            int x;
-            cin >> x;
-            enqueue(q, x);
-        }
-    } else if (method == 2) {
-        string fileName;
-        cout << "Введите имя файла: ";
-        cin >> fileName;
-        ifstream fin(fileName);
-        if (!fin.is_open()) {
-            cout << "Не удалось открыть файл\n";
-            return;
-        }
-
-        fin >> n;
-        for (int i = 0; i < n; ++i) {
-            int x;
-            fin >> x;
-            enqueue(q, x);
-        }
-    } else if (method == 3) {
-        int l, r;
-        cout << "Введите количество элементов: ";
-        cin >> n;
-        cout << "Введите диапазон [L R]: ";
-        cin >> l >> r;
-        if (l > r) {
-            int t = l;
-            l = r;
-            r = t;
-        }
-
-        cout << "Сгенерировано: ";
-        for (int i = 0; i < n; ++i) {
-            int x = l + rand() % (r - l + 1);
-            cout << x << ' ';
-            enqueue(q, x);
-        }
-        cout << '\n';
-    } else {
-        cout << "Неверный способ\n";
-    }
-}
-
-void fillList(PNode& head, PNode& tail, int minN) {
-    using namespace std;
-    int method = 0;
-    cout << "Способ заполнения списка: 1-клавиатура, 2-файл, 3-случайно: ";
-    cin >> method;
-
-    int n = 0;
-
-    if (method == 1) {
-        cout << "Введите количество элементов: ";
-        cin >> n;
-        if (n < minN) {
-            cout << "Нужно минимум " << minN << " элементов\n";
-            return;
-        }
-
-        cout << "Введите " << n << " чисел: ";
-        for (int i = 0; i < n; ++i) {
-            int x;
-            cin >> x;
-            pushback(head, tail, x);
-        }
-    } else if (method == 2) {
-        string fileName;
-        cout << "Введите имя файла: ";
-        cin >> fileName;
-        ifstream fin(fileName);
-        if (!fin.is_open()) {
-            cout << "Не удалось открыть файл\n";
-            return;
-        }
-
-        fin >> n;
-        if (n < minN) {
-            cout << "В файле меньше чем " << minN << " элементов\n";
-            return;
-        }
-
-        for (int i = 0; i < n; ++i) {
-            int x;
-            fin >> x;
-            pushback(head, tail, x);
-        }
-    } else if (method == 3) {
-        int l, r;
-        cout << "Введите количество элементов: ";
-        cin >> n;
-        if (n < minN) {
-            cout << "Нужно минимум " << minN << " элементов\n";
-            return;
-        }
-
-        cout << "Введите диапазон [L R]: ";
-        cin >> l >> r;
-        if (l > r) {
-            int t = l;
-            l = r;
-            r = t;
-        }
-
-        cout << "Сгенерировано: ";
-        for (int i = 0; i < n; ++i) {
-            int x = l + rand() % (r - l + 1);
-            cout << x << ' ';
-            pushback(head, tail, x);
-        }
-        cout << '\n';
-    } else {
-        cout << "Неверный способ\n";
-    }
-}
-
-//вставка значения в список по убыванию
-void sortik(PNode& head, int value){
-    PNode p = new Node(value);
-
-    if(!head || value > head->data){
-        p->next = head;
-        head = p;
+    if (!head_) {
+        head_ = tail_ = p;
         return;
     }
 
-    PNode cur = head;
-    while(cur-> next && cur->next->data >= value){
+    if (value > head_->data) {
+        p->next = head_;
+        head_ = p;
+        return;
+    }
+
+    Node* cur = head_;
+    while (cur->next && cur->next->data >= value) {
         cur = cur->next;
     }
 
     p->next = cur->next;
     cur->next = p;
+
+    if (!p->next) tail_ = p;
 }
 
-//снять 9 верхних элементов стека и вывести новый P2
-void dynamic6(PNode& top){
-    using namespace std;
-    cout << "Извлекаем 9 элементов: ";
-    for(int i = 0; i < 9; i++){
-        int x;
-        if(!pop(top, x)) break;
-        cout << x << ' ';
-    }
-    cout << endl;
+// listwork62: построить список по убыванию из файла
+bool SinglyList::buildSortedDescFromFile(const string& fileName) {
+    clear();
 
-    if(top){
-        cout << "P2 = " << top << endl;
-    }
-    else{
-        cout << "P2 = nullptr" << endl;
-    }
-}
+    ifstream fin(fileName);
+    if (!fin.is_open()) return false;
 
-//перенести все элементы первой очереди в конец второй
-void dynamic21(Queue& first, Queue& second){
-    if(!first.head) return;
-
-    if(!second.head){
-        second.head = first.head;
-        second.tail = first.tail;
-    }
-    else{
-        second.tail->next = first.head;
-        second.tail = first.tail;
-    }
-
-    first.head = nullptr;
-    first.tail = nullptr;
-}
-
-//вернуть указатель на 5-й элемент списка
-PNode listWork4(PNode head){
-    for(int i = 1; i < 5 && head; i++){
-        head = head->next;
-    }
-    return head;
-}
-
-//вставить M перед каждым вторым элементом, вернуть хвост P2
-PNode listWork25(PNode& head, int m){
-    if(!head || !head->next) return head;
-
-    PNode prew = head;
-    PNode curr = head->next;
-    int pos = 2;
-
-    while(curr){
-        if(pos % 2 == 0){
-            PNode ins = new Node(m);
-            prew->next = ins;
-            ins->next = curr;
-
-            prew = curr;
-            curr = curr->next;
-            pos++;
-        }
-        else{
-            prew = curr;
-            curr = curr->next;
-            pos++;
-        }
-    }
-
-    PNode tail = head;
-    while(tail && tail->next) tail = tail->next;
-    return tail;
-}
-
-//прочитать N чисел из файла и собрать список по убыванию
-bool listWork62(const std::string& filename, PNode& head){
-    using namespace std;
-    ifstream fin(filename);
-    if(!fin.is_open()) return false;
-
-    int n;
+    int n = 0;
     fin >> n;
+    if (n < 0) return false;
 
-    for(int i = 0; i < n; i++){
+    for (int i = 0; i < n; ++i) {
         int x;
         fin >> x;
-        sortik(head, x);
+        insertSortedDesc(x);
     }
 
     return true;

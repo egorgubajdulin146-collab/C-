@@ -1,51 +1,112 @@
-#ifndef LAB10_VARIANT4_H
-#define LAB10_VARIANT4_H
+#ifndef FUNCION_H
+#define FUNCION_H
 
 #include <string>
 
-// Узел для стека/очереди/списка
-struct Node {
-    int data;
-    Node* next;
+class Stack {
+private:
+    struct Node {
+        int data;
+        Node* next;
+        Node(int v, Node* n = nullptr) : data(v), next(n) {}
+    };
 
-    explicit Node(int value) : data(value), next(nullptr) {}
+    Node* top_;
+    void copyFrom(const Stack& other);
+
+public:
+    Stack();
+    Stack(const Stack& other);
+    Stack& operator=(const Stack& other);
+    ~Stack();
+
+    void push(int value);
+    bool pop(int& value);
+    bool find(int value) const;
+    bool isEmpty() const;
+    void clear();
+    void print() const;
+    const void* topAddress() const;
+
+    bool fillKeyboard(int minN);
+    bool fillFile(const std::string& fileName, int minN);
+    bool fillRandom(int n, int l, int r, int minN);
+
+    void solveDynamic6();
 };
 
-using PNode = Node*;
+class QueueDS {
+private:
+    struct Node {
+        int data;
+        Node* next;
+        explicit Node(int v) : data(v), next(nullptr) {}
+    };
 
-struct Queue {
-    PNode head;
-    PNode tail;
+    Node* head_;
+    Node* tail_;
+    void copyFrom(const QueueDS& other);
 
-    Queue() : head(nullptr), tail(nullptr) {}
+public:
+    QueueDS();
+    QueueDS(const QueueDS& other);
+    QueueDS& operator=(const QueueDS& other);
+    ~QueueDS();
+
+    void enqueue(int value);
+    bool dequeue(int& value);
+    bool find(int value) const;
+    bool isEmpty() const;
+    void clear();
+    void print() const;
+    const void* headAddress() const;
+    const void* tailAddress() const;
+
+    bool fillKeyboard();
+    bool fillFile(const std::string& fileName);
+    bool fillRandom(int n, int l, int r);
+
+    void moveAllTo(QueueDS& second);
 };
 
-void push(PNode& top, int value);
-bool pop(PNode& top, int& value);
-void printstack(PNode top);
-void clearstack(PNode& top);
+class SinglyList {
+private:
+    struct Node {
+        int data;
+        Node* next;
+        explicit Node(int v) : data(v), next(nullptr) {}
+    };
 
-void enqueue(Queue& q, int value);
-bool dequeue(Queue& q, int& value);
-void printqueue(const Queue& q);
-void clearqueue(Queue& q);
+    Node* head_;
+    Node* tail_;
+    void copyFrom(const SinglyList& other);
 
-void pushback(PNode& head, PNode& tail, int value);
-void printlist(PNode head);
-void clearlist(PNode& head);
-void sortik(PNode& head, int value);
-void fillStack(PNode& top, int minN);
-void fillQueue(Queue& q);
-void fillList(PNode& head, PNode& tail, int minN);
+public:
+    SinglyList();
+    SinglyList(const SinglyList& other);
+    SinglyList& operator=(const SinglyList& other);
+    ~SinglyList();
 
-void dynamic6(PNode& top);
+    void pushBack(int value);
+    bool find(int value) const;
+    bool removeFirst(int value);
+    bool isEmpty() const;
+    void clear();
+    void print() const;
+    const void* headAddress() const;
+    const void* tailAddress() const;
 
-void dynamic21(Queue& first, Queue& second);
+    bool fillKeyboard(int minN);
+    bool fillFile(const std::string& fileName, int minN);
+    bool fillRandom(int n, int l, int r, int minN);
 
-PNode listWork4(PNode head);
+    const void* fifthAddress() const;
+    bool fifthValue(int& value) const;
 
-PNode listWork25(PNode& head, int m);
+    void insertBeforeEachSecond(int m);
 
-bool listWork62(const std::string& fileName, PNode& head);
+    void insertSortedDesc(int value);
+    bool buildSortedDescFromFile(const std::string& fileName);
+};
 
 #endif

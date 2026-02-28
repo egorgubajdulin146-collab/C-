@@ -1,139 +1,253 @@
 #include "funcion.h"
 
-#include <ctime>
 #include <cstdlib>
+#include <ctime>
+#include <fstream>
 #include <iostream>
 #include <string>
 
+using namespace std;
 
+bool fillStackByMode(Stack& st, int minN) {
+    int mode = 0;
+    cout << "Заполнение стека: 1-клавиатура, 2-файл, 3-случайно: ";
+    cin >> mode;
+
+    if (mode == 1) return st.fillKeyboard(minN);
+
+    if (mode == 2) {
+        string f;
+        cout << "Имя файла: ";
+        cin >> f;
+        return st.fillFile(f, minN);
+    }
+
+    if (mode == 3) {
+        int n, l, r;
+        cout << "n l r: ";
+        cin >> n >> l >> r;
+        return st.fillRandom(n, l, r, minN);
+    }
+
+    return false;
+}
+
+bool fillQueueByMode(QueueDS& q) {
+    int mode = 0;
+    cout << "Заполнение очереди: 1-клавиатура, 2-файл, 3-случайно: ";
+    cin >> mode;
+
+    if (mode == 1) return q.fillKeyboard();
+
+    if (mode == 2) {
+        string f;
+        cout << "Имя файла: ";
+        cin >> f;
+        return q.fillFile(f);
+    }
+
+    if (mode == 3) {
+        int n, l, r;
+        cout << "n l r: ";
+        cin >> n >> l >> r;
+        return q.fillRandom(n, l, r);
+    }
+
+    return false;
+}
+
+bool fillListByMode(SinglyList& lst, int minN) {
+    int mode = 0;
+    cout << "Заполнение списка: 1-клавиатура, 2-файл, 3-случайно: ";
+    cin >> mode;
+
+    if (mode == 1) return lst.fillKeyboard(minN);
+
+    if (mode == 2) {
+        string f;
+        cout << "Имя файла: ";
+        cin >> f;
+        return lst.fillFile(f, minN);
+    }
+
+    if (mode == 3) {
+        int n, l, r;
+        cout << "n l r: ";
+        cin >> n >> l >> r;
+        return lst.fillRandom(n, l, r, minN);
+    }
+
+    return false;
+}
 
 int main() {
-    using namespace std;
     srand(static_cast<unsigned int>(time(nullptr)));
 
-    int cmd;
+    int choice = -1;
 
     do {
         cout << "\n\tЛаба 10, вариант 4\n";
-        cout << "1 - Dynamic 6\n";
-        cout << "2 - Dynamic 21\n";
+        cout << "1 - Dynamic6\n";
+        cout << "2 - Dynamic21\n";
         cout << "3 - ListWork4\n";
         cout << "4 - ListWork25\n";
         cout << "5 - ListWork62\n";
         cout << "0 - Выход\n";
         cout << "Выбор: ";
-        cin >> cmd;
+        cin >> choice;
 
-        switch (cmd) {
+        switch (choice) {
             case 1: {
-                PNode top = nullptr;
-                fillStack(top, 10);
+                Stack st;
+                if (!fillStackByMode(st, 10)) {
+                    cout << "Ошибка заполнения\n";
+                    break;
+                }
 
-                printstack(top);
-                dynamic6(top);
-                printstack(top);
+                st.print();
 
-                clearstack(top);
+                cout << "Поиск в стеке, число: ";
+                int key = 0;
+                cin >> key;
+                cout << (st.find(key) ? "Найдено\n" : "Не найдено\n");
+
+                st.solveDynamic6();
+                st.print();
+
+                Stack copySt(st);
+                cout << "Копия стека: ";
+                copySt.print();
                 break;
             }
 
             case 2: {
-                Queue q1, q2;
+                QueueDS q1, q2;
 
-                cout << "Первая очередь:\n";
-                fillQueue(q1);
-                cout << "Вторая очередь:\n";
-                fillQueue(q2);
+                cout << "Первая очередь\n";
+                if (!fillQueueByMode(q1)) {
+                    cout << "Ошибка\n";
+                    break;
+                }
 
-                cout << "Первая ";
-                printqueue(q1);
-                cout << "Вторая ";
-                printqueue(q2);
+                cout << "Вторая очередь\n";
+                if (!fillQueueByMode(q2)) {
+                    cout << "Ошибка\n";
+                    break;
+                }
 
-                dynamic21(q1, q2);
+                q1.print();
+                q2.print();
+
+                q1.moveAllTo(q2);
 
                 cout << "После переноса:\n";
-                cout << "Первая ";
-                printqueue(q1);
-                cout << "Вторая ";
-                printqueue(q2);
+                q1.print();
+                q2.print();
+                cout << "P3 = " << q2.headAddress() << ", P4 = " << q2.tailAddress() << '\n';
 
-                if (q2.head) cout << "P3 = " << q2.head << ", P4 = " << q2.tail << '\n';
-                else cout << "P3 = nullptr, P4 = nullptr\n";
-
-                clearqueue(q1);
-                clearqueue(q2);
+                cout << "Поиск во 2-й очереди, число: ";
+                int key = 0;
+                cin >> key;
+                cout << (q2.find(key) ? "Найдено\n" : "Не найдено\n");
                 break;
             }
 
             case 3: {
-                PNode head = nullptr, tail = nullptr;
-                fillList(head, tail, 5);
+                SinglyList lst;
+                if (!fillListByMode(lst, 5)) {
+                    cout << "Ошибка заполнения\n";
+                    break;
+                }
 
-                printlist(head);
+                lst.print();
 
-                PNode p5 = listWork4(head);
-                if (p5) cout << "P5 = " << p5 << ", value = " << p5->data << '\n';
-                else cout << "P5 = nullptr\n";
+                const void* p5 = lst.fifthAddress();
+                int v5 = 0;
+                if (p5 && lst.fifthValue(v5)) {
+                    cout << "P5 = " << p5 << ", value = " << v5 << '\n';
+                } else {
+                    cout << "P5 = nullptr\n";
+                }
 
-                clearlist(head);
+                cout << "Поиск в списке, число: ";
+                int key = 0;
+                cin >> key;
+                cout << (lst.find(key) ? "Найдено\n" : "Не найдено\n");
+
+                cout << "Удалить число: ";
+                cin >> key;
+                cout << (lst.removeFirst(key) ? "Удалено\n" : "Не найдено\n");
+                lst.print();
                 break;
             }
 
             case 4: {
-                PNode head = nullptr, tail = nullptr;
-                int m;
-
-                fillList(head, tail, 1);
-                cout << "Введите M: ";
-                cin >> m;
+                SinglyList lst;
+                if (!fillListByMode(lst, 1)) {
+                    cout << "Ошибка заполнения\n";
+                    break;
+                }
 
                 cout << "До: ";
-                printlist(head);
+                lst.print();
 
-                PNode p2 = listWork25(head, m);
+                int m = 0;
+                cout << "Введите M: ";
+                cin >> m;
+                lst.insertBeforeEachSecond(m);
 
                 cout << "После: ";
-                printlist(head);
-
-                if (p2) cout << "P2 = " << p2 << ", value = " << p2->data << '\n';
-                else cout << "P2 = nullptr\n";
-
-                clearlist(head);
+                lst.print();
+                cout << "P2 = " << lst.tailAddress() << '\n';
                 break;
             }
 
             case 5: {
-                PNode head = nullptr;
-                PNode tail = nullptr;
+                SinglyList lst;
+                int mode = 0;
+                cout << "ListWork62: 1-файл, 2-клавиатура, 3-случайно: ";
+                cin >> mode;
 
-                int method;
-                cout << "Способ заполнения для ListWork62: 1-клавиатура, 2-файл, 3-случайно: ";
-                cin >> method;
+                if (mode == 1) {
+                    string f;
+                    cout << "Имя файла: ";
+                    cin >> f;
 
-                if (method == 1) {
-                    int n;
-                    cout << "Введите количество элементов: ";
+                    ifstream fin(f);
+                    if (!fin.is_open()) {
+                        cout << "Ошибка файла\n";
+                        break;
+                    }
+
+                    int n = 0;
+                    fin >> n;
+                    cout << "До (из файла): ";
+                    for (int i = 0; i < n; ++i) {
+                        int x = 0;
+                        fin >> x;
+                        cout << x << ' ';
+                    }
+                    cout << '\n';
+                    fin.close();
+
+                    if (!lst.buildSortedDescFromFile(f)) {
+                        cout << "Ошибка файла\n";
+                        break;
+                    }
+                } else if (mode == 2) {
+                    int n = 0;
+                    cout << "Количество: ";
                     cin >> n;
                     cout << "Введите " << n << " чисел: ";
                     for (int i = 0; i < n; ++i) {
-                        int x;
+                        int x = 0;
                         cin >> x;
-                        sortik(head, x);
+                        lst.insertSortedDesc(x);
                     }
-                } else if (method == 2) {
-                    string fileName;
-                    cout << "Введите имя файла: ";
-                    cin >> fileName;
-                    if (!listWork62(fileName, head)) {
-                        cout << "Не удалось открыть файл\n";
-                    }
-                } else if (method == 3) {
-                    int n, l, r;
-                    cout << "Введите количество элементов: ";
-                    cin >> n;
-                    cout << "Введите диапазон [L R]: ";
-                    cin >> l >> r;
+                } else if (mode == 3) {
+                    int n = 0, l = 0, r = 0;
+                    cout << "n l r: ";
+                    cin >> n >> l >> r;
                     if (l > r) {
                         int t = l;
                         l = r;
@@ -144,25 +258,17 @@ int main() {
                     for (int i = 0; i < n; ++i) {
                         int x = l + rand() % (r - l + 1);
                         cout << x << ' ';
-                        sortik(head, x);
+                        lst.insertSortedDesc(x);
                     }
                     cout << '\n';
                 } else {
-                    cout << "Неверный способ\n";
-                }
-
-                if (head) {
-                    PNode p = head;
-                    while (p->next) p = p->next;
-                    tail = p;
+                    cout << "Неверный режим\n";
+                    break;
                 }
 
                 cout << "Список по убыванию: ";
-                printlist(head);
-                if (head) cout << "P1 = " << head << ", P2 = " << tail << '\n';
-                else cout << "P1 = nullptr, P2 = nullptr\n";
-
-                clearlist(head);
+                lst.print();
+                cout << "P1 = " << lst.headAddress() << ", P2 = " << lst.tailAddress() << '\n';
                 break;
             }
 
@@ -171,10 +277,10 @@ int main() {
                 break;
 
             default:
-                cout << "Неверный выбор\n";
+                cout << "Неверный пункт\n";
                 break;
         }
-    } while (cmd != 0);
+    } while (choice != 0);
 
     return 0;
 }
