@@ -95,6 +95,13 @@ const void* Stack::topAddress() const {
     return static_cast<const void*>(top_);
 }
 
+// получить значение вершины стека
+bool Stack::topValue(int& value) const {
+    if (!top_) return false;
+    value = top_->data;
+    return true;
+}
+
 // заполнить стек с клавиатуры
 bool Stack::fillKeyboard(int minN) {
     clear();
@@ -166,8 +173,11 @@ void Stack::solveDynamic6() {
     }
     cout << '\n';
 
-    if (top_) cout << "P2 = " << topAddress() << '\n';
-    else cout << "P2 = nullptr\n";
+    int v = 0;
+    if (topValue(v))
+        cout << "P2 = " << topAddress() << ", value = " << v << '\n';
+    else
+        cout << "P2 = nullptr\n";
 }
 
 // создать пустую очередь
@@ -258,14 +268,26 @@ void QueueDS::print() const {
 
 // получить адрес головы очереди
 const void* QueueDS::headAddress() const {
-    Node* p = head_;
-    int f= head_->data;
-    return static_cast<const void*>(f);
+    return static_cast<const void*>(head_);
 }
 
 // получить адрес хвоста очереди
 const void* QueueDS::tailAddress() const {
     return static_cast<const void*>(tail_);
+}
+
+// получить значение головы очереди
+bool QueueDS::headValue(int& value) const {
+    if (!head_) return false;
+    value = head_->data;
+    return true;
+}
+
+// получить значение хвоста очереди
+bool QueueDS::tailValue(int& value) const {
+    if (!tail_) return false;
+    value = tail_->data;
+    return true;
 }
 
 // заполнить очередь с клавиатуры
@@ -443,10 +465,23 @@ void SinglyList::print() const {
 const void* SinglyList::headAddress() const {
     return static_cast<const void*>(head_);
 }
+// получить значение хвоста списка
+bool SinglyList::headValue(int& value) const {
+    if (!head_) return false;
+    value = head_->data;
+    return true;
+}
 
 // получить адрес хвоста списка
 const void* SinglyList::tailAddress() const {
     return static_cast<const void*>(tail_);
+}
+
+// получить значение хвоста списка
+bool SinglyList::tailValue(int& value) const {
+    if (!tail_) return false;
+    value = tail_->data;
+    return true;
 }
 
 // заполнить список с клавиатуры

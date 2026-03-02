@@ -143,7 +143,15 @@ int main() {
                 cout << "После переноса:\n";
                 q1.print();
                 q2.print();
-                cout << "P3 = " << q2.headAddress() << ", P4 = " << q2.tailAddress() << '\n';
+                int v3 = 0, v4 = 0;
+                bool has3 = q2.headValue(v3);
+                bool has4 = q2.tailValue(v4);
+                if (has3 && has4) {
+                    cout << "P3 = " << q2.headAddress() << ", value = " << v3
+                         << ", P4 = " << q2.tailAddress() << ", value = " << v4 << '\n';
+                } else {
+                    cout << "P3 = nullptr, P4 = nullptr\n";
+                }
 
                 cout << "Поиск во 2-й очереди, число: ";
                 int key = 0;
@@ -198,7 +206,13 @@ int main() {
 
                 cout << "После: ";
                 lst.print();
-                cout << "P2 = " << lst.tailAddress() << '\n';
+                int v2 = 0;
+                
+                if (lst.tailValue(v2))
+                    cout << "P2 = " << lst.tailAddress() << ", value = " << v2 << '\n';
+                else
+                    cout << "P2 = nullptr\n";
+
                 break;
             }
 
@@ -268,7 +282,13 @@ int main() {
 
                 cout << "Список по убыванию: ";
                 lst.print();
-                cout << "P1 = " << lst.headAddress() << ", P2 = " << lst.tailAddress() << '\n';
+                
+                int v1 = 0, v2 = 0;
+                if (lst.tailValue(v2) && lst.headValue(v1))
+                    cout << "P1 = " << lst.headAddress() << ", P2 = " << lst.tailAddress() << ", value(P1) = " << v1 << ", value(P2) = " << v2 << '\n';
+                else
+                    cout << "P1 = " << lst.headAddress() << ", P2 = nullptr\n";
+
                 break;
             }
 

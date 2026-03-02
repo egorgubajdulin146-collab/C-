@@ -27,6 +27,7 @@ public:
     void clear();
     void print() const;
     const void* topAddress() const;
+    bool topValue(int& value) const;
 
     bool fillKeyboard(int minN);
     bool fillFile(const std::string& fileName, int minN);
@@ -61,6 +62,8 @@ public:
     void print() const;
     const void* headAddress() const;
     const void* tailAddress() const;
+    bool headValue(int& value) const;
+    bool tailValue(int& value) const;
 
     bool fillKeyboard();
     bool fillFile(const std::string& fileName);
@@ -95,6 +98,9 @@ public:
     void print() const;
     const void* headAddress() const;
     const void* tailAddress() const;
+    bool headValue(int& value) const;
+    bool tailValue(int& value) const;
+
 
     bool fillKeyboard(int minN);
     bool fillFile(const std::string& fileName, int minN);
