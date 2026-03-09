@@ -1,8 +1,9 @@
-#ifndef LAB11_H
-#define LAB11_H
+#ifndef FUNCION_H
+#define FUNCION_H
 
 #include <string>
 
+// Узел односвязного списка (для CircularList)
 class Node {
 public:
     int data;
@@ -11,6 +12,7 @@ public:
     Node(int value = 0);
 };
 
+// Узел двусвязного списка (для DoublyList и барьерного цикла)
 class PNode {
 public:
     int data;
@@ -20,6 +22,7 @@ public:
     PNode(int value = 0);
 };
 
+// Кольцевой односвязный список
 class CircularList {
 private:
     Node* head;
@@ -47,9 +50,11 @@ public:
     bool fillFile(const std::string& fileName, int minCount);
     bool fillRandom(int n, int left, int right, int minCount);
 
-    bool writeByStepAndErase(int k, const std::string& outFileName); // ListWork69
+    // ListWork69
+    bool writeByStepAndErase(int k, const std::string& outFileName);
 };
 
+// Линейный двусвязный список
 class DoublyList {
 private:
     PNode* head;
@@ -79,10 +84,19 @@ public:
     bool fillFile(const std::string& fileName, int minCount);
     bool fillRandom(int n, int left, int right, int minCount);
 
-    void printBetweenMinMax() const;                         // ListWork41
-    bool writeReverseAndErase(const std::string& outFileName); // ListWork63
+    // ListWork41
+    void printBetweenMinMax() const;
+
+    // ListWork63
+    bool writeReverseAndErase(const std::string& outFileName);
+
+    // ListWork46
+    PNode* makeBarrierCycle();
+    static void printBarrierCycle(PNode* barrier);
+    static void clearBarrierCycle(PNode*& barrier);
 };
 
+// Задания варианта 4
 void ListWork69();
 void ListWork41();
 void ListWork63();

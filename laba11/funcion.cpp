@@ -1,7 +1,49 @@
 #include "funcion.h"
-#include <cstdlib>
+
 #include <fstream>
 #include <iostream>
+#include <limits>
+#include <string>
+#include <cstdlib>
+#include <cctype>
+
+using namespace std;
+
+// проверить и считать целое число
+static int readInt(const string& prompt) {
+    while (true) {
+        cout << prompt;
+        string s;
+        if (!(cin >> s)) continue;
+
+        try {
+            size_t pos = 0;
+            int x = stoi(s, &pos);
+            if (pos == s.size()) return x; // вся строка число
+        } catch (...) {}
+
+        cout << "Ошибка ввода. Введите целое число.\n";
+    }
+}
+
+
+// проверить и считать целое число не меньше minVal
+static int readIntMin(const string& prompt, int minVal) {
+    while (true) {
+        int x = readInt(prompt);
+        if (x >= minVal) return x;
+        cout << "Число должно быть >= " << minVal << ".\n";
+    }
+}
+
+// проверить и считать целое число в диапазоне [l; r]
+static int readIntRange(const string& prompt, int l, int r) {
+    while (true) {
+        int x = readInt(prompt);
+        if (x >= l && x <= r) return x;
+        cout << "Число должно быть в диапазоне [" << l << "; " << r << "].\n";
+    }
+}
 
 // создать Node
 Node::Node(int value) : data(value), next(nullptr) {}
@@ -37,37 +79,37 @@ bool CircularList::empty() const {
 }
 
 // получить размер CircularList
-int CircularList::size() const{
+int CircularList::size() const {
     return sizeList;
 }
 
 // получить хвост CircularList
 Node* CircularList::getTail() const {
-    if(!head) return nullptr;
+    if (!head) return nullptr;
 
     Node* tail = head;
-    while(tail->next != head){
+    while (tail->next != head) {
         tail = tail->next;
     }
     return tail;
 }
 
 // скопировать CircularList
-void CircularList::copyFrom(const CircularList& other){
-    if(!other.head) return;
+void CircularList::copyFrom(const CircularList& other) {
+    if (!other.head) return;
 
     Node* cur = other.head;
-    for(int i = 0; i < other.sizeList; i++){
+    for (int i = 0; i < other.sizeList; ++i) {
         pushBack(cur->data);
         cur = cur->next;
     }
 }
 
 // добавить в конец CircularList
-void CircularList::pushBack(int value){
+void CircularList::pushBack(int value) {
     Node* node = new Node(value);
 
-    if (!head){
+    if (!head) {
         head = node;
         node->next = node;
         sizeList = 1;
@@ -77,7 +119,7 @@ void CircularList::pushBack(int value){
     Node* tail = getTail();
     tail->next = node;
     node->next = head;
-    sizeList++;
+    ++sizeList;
 }
 
 // удалить первое вхождение из CircularList
@@ -112,25 +154,26 @@ bool CircularList::removeFirst(int value) {
 }
 
 // поиск значения в CircularList
-bool CircularList::contains(int value) const{
-    if(!head) return false;
+bool CircularList::contains(int value) const {
+    if (!head) return false;
 
     Node* cur = head;
-    for(int i = 0; i < sizeList; ++i){
-        if(cur->data == value) return true;
+    for (int i = 0; i < sizeList; ++i) {
+        if (cur->data == value) return true;
         cur = cur->next;
     }
     return false;
 }
 
 // очистить CircularList
-void CircularList::clear(){
-    while(!empty()){
+void CircularList::clear() {
+    while (!empty()) {
         removeFirst(head->data);
     }
 }
+
+// вывести CircularList
 void CircularList::print() const {
-    using namespace std;
     cout << "list: ";
     if (!head) {
         cout << "nullptr\n";
@@ -147,38 +190,29 @@ void CircularList::print() const {
 
 // заполнить CircularList с клавиатуры
 bool CircularList::fillKeyboard(int minCount) {
-    using namespace std;
     clear();
 
-    int n = 0;
-    cout << "Введите количество элементов: ";
-    cin >> n;
-    if (n < minCount) return false;
-
-    cout << "Введите " << n << " чисел: ";
+    int n = readIntMin("Введите количество элементов: ", minCount);
     for (int i = 0; i < n; ++i) {
-        int x = 0;
-        cin >> x;
+        int x = readInt("Введите число: ");
         pushBack(x);
     }
     return true;
 }
 
 // заполнить CircularList из файла
-bool CircularList::fillFile(const std::string& fileName, int minCount) {
-    using namespace std;
+bool CircularList::fillFile(const string& fileName, int minCount) {
     clear();
 
     ifstream fin(fileName);
     if (!fin.is_open()) return false;
 
     int n = 0;
-    fin >> n;
-    if (n < minCount) return false;
+    if (!(fin >> n) || n < minCount) return false;
 
     for (int i = 0; i < n; ++i) {
         int x = 0;
-        fin >> x;
+        if (!(fin >> x)) return false;
         pushBack(x);
     }
     return true;
@@ -186,7 +220,6 @@ bool CircularList::fillFile(const std::string& fileName, int minCount) {
 
 // заполнить CircularList случайными числами
 bool CircularList::fillRandom(int n, int left, int right, int minCount) {
-    using namespace std;
     clear();
 
     if (n < minCount) return false;
@@ -207,8 +240,7 @@ bool CircularList::fillRandom(int n, int left, int right, int minCount) {
 }
 
 // ListWork69: вывести в файл с шагом k и удалить элементы
-bool CircularList::writeByStepAndErase(int k, const std::string& outFileName) {
-    using namespace std;
+bool CircularList::writeByStepAndErase(int k, const string& outFileName) {
     if (k <= 0) return false;
 
     ofstream fout(outFileName);
@@ -220,10 +252,12 @@ bool CircularList::writeByStepAndErase(int k, const std::string& outFileName) {
     Node* cur = head;
 
     while (!empty()) {
+        // сначала выводим текущий
         if (!firstWrite) fout << ' ';
         fout << cur->data;
         firstWrite = false;
 
+        // удаляем текущий
         if (sizeList == 1) {
             delete cur;
             head = nullptr;
@@ -239,6 +273,7 @@ bool CircularList::writeByStepAndErase(int k, const std::string& outFileName) {
         delete del;
         --sizeList;
 
+        // потом делаем шаг k-1
         for (int i = 1; i < k; ++i) {
             prev = cur;
             cur = cur->next;
@@ -247,6 +282,7 @@ bool CircularList::writeByStepAndErase(int k, const std::string& outFileName) {
 
     return true;
 }
+
 // создать пустой DoublyList
 DoublyList::DoublyList() : head(nullptr), tail(nullptr), sizeList(0) {}
 
@@ -350,54 +386,47 @@ void DoublyList::clear() {
 
 // вывести DoublyList слева направо
 void DoublyList::printForward() const {
-    using namespace std;
     cout << "list forward: ";
-    for (PNode* p = head; p != nullptr; p = p->next) cout << p->data << ' ';
+    for (PNode* p = head; p != nullptr; p = p->next) {
+        cout << p->data << ' ';
+    }
     cout << '\n';
 }
 
 // вывести DoublyList справа налево
 void DoublyList::printBackward() const {
-    using namespace std;
     cout << "list backward: ";
-    for (PNode* p = tail; p != nullptr; p = p->prev) cout << p->data << ' ';
+    for (PNode* p = tail; p != nullptr; p = p->prev) {
+        cout << p->data << ' ';
+    }
     cout << '\n';
 }
 
 // заполнить DoublyList с клавиатуры
 bool DoublyList::fillKeyboard(int minCount) {
-    using namespace std;
     clear();
 
-    int n = 0;
-    cout << "Введите количество элементов: ";
-    cin >> n;
-    if (n < minCount) return false;
-
-    cout << "Введите " << n << " чисел: ";
+    int n = readIntMin("Введите количество элементов: ", minCount);
     for (int i = 0; i < n; ++i) {
-        int x = 0;
-        cin >> x;
+        int x = readInt("Введите число: ");
         pushBack(x);
     }
     return true;
 }
 
 // заполнить DoublyList из файла
-bool DoublyList::fillFile(const std::string& fileName, int minCount) {
-    using namespace std;
+bool DoublyList::fillFile(const string& fileName, int minCount) {
     clear();
 
     ifstream fin(fileName);
     if (!fin.is_open()) return false;
 
     int n = 0;
-    fin >> n;
-    if (n < minCount) return false;
+    if (!(fin >> n) || n < minCount) return false;
 
     for (int i = 0; i < n; ++i) {
         int x = 0;
-        fin >> x;
+        if (!(fin >> x)) return false;
         pushBack(x);
     }
     return true;
@@ -405,7 +434,6 @@ bool DoublyList::fillFile(const std::string& fileName, int minCount) {
 
 // заполнить DoublyList случайными числами
 bool DoublyList::fillRandom(int n, int left, int right, int minCount) {
-    using namespace std;
     clear();
 
     if (n < minCount) return false;
@@ -425,10 +453,8 @@ bool DoublyList::fillRandom(int n, int left, int right, int minCount) {
     return true;
 }
 
-// ListWork41: вывести элементы между минимальным и максимальным
+// ListWork41: вывести min, max и элементы между ними
 void DoublyList::printBetweenMinMax() const {
-    using namespace std;
-
     if (!head || !head->next) {
         cout << "Список слишком короткий\n";
         return;
@@ -452,7 +478,6 @@ void DoublyList::printBetweenMinMax() const {
     PNode* left = minNode;
     PNode* right = maxNode;
 
-    // чтобы идти только слева направо
     for (PNode* p = head; p != nullptr; p = p->next) {
         if (p == minNode) break;
         if (p == maxNode) {
@@ -464,7 +489,6 @@ void DoublyList::printBetweenMinMax() const {
 
     cout << "Элементы между min и max: ";
     bool has = false;
-
     for (PNode* p = left->next; p != nullptr && p != right; p = p->next) {
         cout << p->data << ' ';
         has = true;
@@ -474,22 +498,18 @@ void DoublyList::printBetweenMinMax() const {
     cout << '\n';
 }
 
-
-// ListWork63: вывести в файл в обратном порядке и удалять элементы
-bool DoublyList::writeReverseAndErase(const std::string& outFileName) {
-    using namespace std;
+// ListWork63: вывести в файл в обратном порядке и удалить все
+bool DoublyList::writeReverseAndErase(const string& outFileName) {
     ofstream fout(outFileName);
     if (!fout.is_open()) return false;
 
     bool first = true;
-
     while (tail) {
         if (!first) fout << ' ';
         fout << tail->data;
         first = false;
 
         PNode* del = tail;
-
         if (head == tail) {
             head = nullptr;
             tail = nullptr;
@@ -506,12 +526,70 @@ bool DoublyList::writeReverseAndErase(const std::string& outFileName) {
     return true;
 }
 
+// ListWork46: преобразовать линейный двусвязный список в циклический с барьером
+PNode* DoublyList::makeBarrierCycle(){
+    PNode* barrier = new PNode(0);
+
+    if(!head){
+        barrier->next = barrier;
+        barrier->prev = barrier;
+        return barrier;
+    }
+
+    barrier->next = head;
+    barrier->prev = tail;
+    head->prev = barrier;
+    tail->next = barrier;
+    head = nullptr;
+    tail = nullptr;
+    sizeList = 0;
+
+    return barrier;
+}
+
+// вывести циклический список с барьером
+void DoublyList::printBarrierCycle(PNode* barrier){
+    using namespace std;
+    if (!barrier) {
+        cout << "barrier = nullptr\n";
+        return;
+    }
+
+    cout << "barrier = " << barrier << " (data = " << barrier->data << ")\n";
+    cout << "cycle: |B| ";
+
+    PNode* cur = barrier->next;
+    if (cur == barrier) {
+        cout << "-> |B|\n";
+        return;
+    }
+
+    while (cur != barrier) {
+        cout << "-> " << cur->data << ' ';
+        cur = cur->next;
+    }
+
+    cout << "-> |B|\n";
+}
+
+// очистить циклический список с барьером
+void DoublyList::clearBarrierCycle(PNode*& barrier) {
+    if (!barrier) return;
+
+    PNode* cur = barrier->next;
+    while (cur != barrier) {
+        PNode* nxt = cur->next;
+        delete cur;
+        cur = nxt;
+    }
+
+    delete barrier;
+    barrier = nullptr;
+}
+
 // выбрать способ заполнения CircularList
 static bool fillCircularByMode(CircularList& list, int minCount) {
-    using namespace std;
-    int mode = 0;
-    cout << "Заполнение: 1-клавиатура, 2-файл, 3-случайно: ";
-    cin >> mode;
+    int mode = readIntRange("Заполнение: 1-клавиатура, 2-файл, 3-случайно: ", 1, 3);
 
     if (mode == 1) return list.fillKeyboard(minCount);
 
@@ -522,22 +600,15 @@ static bool fillCircularByMode(CircularList& list, int minCount) {
         return list.fillFile(fileName, minCount);
     }
 
-    if (mode == 3) {
-        int n = 0, l = 0, r = 0;
-        cout << "Введите n l r: ";
-        cin >> n >> l >> r;
-        return list.fillRandom(n, l, r, minCount);
-    }
-
-    return false;
+    int n = readIntMin("Введите n: ", minCount);
+    int l = readInt("Введите left: ");
+    int r = readInt("Введите right: ");
+    return list.fillRandom(n, l, r, minCount);
 }
 
 // выбрать способ заполнения DoublyList
 static bool fillDoublyByMode(DoublyList& list, int minCount) {
-    using namespace std;
-    int mode = 0;
-    cout << "Заполнение: 1-клавиатура, 2-файл, 3-случайно: ";
-    cin >> mode;
+    int mode = readIntRange("Заполнение: 1-клавиатура, 2-файл, 3-случайно: ", 1, 3);
 
     if (mode == 1) return list.fillKeyboard(minCount);
 
@@ -548,11 +619,28 @@ static bool fillDoublyByMode(DoublyList& list, int minCount) {
         return list.fillFile(fileName, minCount);
     }
 
-    if (mode == 3) {
-        int n = 0, l = 0, r = 0;
-        cout << "Введите n l r: ";
-        cin >> n >> l >> r;
-        return list.fillRandom(n, l, r, minCount);
+    int n = readIntMin("Введите n: ", minCount);
+    int l = readInt("Введите left: ");
+    int r = readInt("Введите right: ");
+    return list.fillRandom(n, l, r, minCount);
+}
+
+bool onlyLetters(const string& s) {
+    if (s.empty()) return false;
+    for (char ch : s) {
+        if (!isalpha(static_cast<unsigned char>(ch))) return false;
+    }
+    return true;
+}
+
+// считать строку из файла (первая непустая строка)
+static bool readLineFromFile(const string& fileName, string& s) {
+    ifstream fin(fileName);
+    if (!fin.is_open()) return false;
+
+    while (getline(fin, s)) {
+        if (!s.empty() && s.back() == '\r') s.pop_back();
+        if (!s.empty()) return true;
     }
 
     return false;
@@ -560,7 +648,6 @@ static bool fillDoublyByMode(DoublyList& list, int minCount) {
 
 // запуск задания 1 (ListWork69)
 void ListWork69() {
-    using namespace std;
     CircularList list;
 
     if (!fillCircularByMode(list, 1)) {
@@ -571,30 +658,25 @@ void ListWork69() {
     cout << "Исходный список:\n";
     list.print();
 
-    int addValue = 0;
-    cout << "Добавить элемент: ";
-    cin >> addValue;
+    int addValue = readInt("Добавить элемент: ");
     list.pushBack(addValue);
+    cout << "После добавления:\n";
+    list.print();
 
-    int findValue = 0;
-    cout << "Поиск значения: ";
-    cin >> findValue;
+    int findValue = readInt("Поиск значения: ");
     cout << (list.contains(findValue) ? "Найдено\n" : "Не найдено\n");
 
-    int delValue = 0;
-    cout << "Удалить значение: ";
-    cin >> delValue;
+    int delValue = readInt("Удалить значение: ");
     cout << (list.removeFirst(delValue) ? "Удалено\n" : "Не найдено\n");
+    cout << "После удаления:\n";
     list.print();
 
     CircularList copied(list);
     cout << "Копия списка:\n";
     copied.print();
 
-    int k = 0;
+    int k = readIntMin("Введите шаг k: ", 1);
     string outFile;
-    cout << "Введите шаг k: ";
-    cin >> k;
     cout << "Имя выходного файла: ";
     cin >> outFile;
 
@@ -610,13 +692,13 @@ void ListWork69() {
 
 // запуск задания 2 (ListWork41)
 void ListWork41() {
-    using namespace std;
-
     DoublyList list;
-    if(!fillDoublyByMode(list, 2)){
+
+    if (!fillDoublyByMode(list, 2)) {
         cout << "Ошибка заполнения\n";
         return;
     }
+
     cout << "Исходный список:\n";
     list.printForward();
 
@@ -624,20 +706,17 @@ void ListWork41() {
     cout << "Копия списка:\n";
     copied.printForward();
 
-    int addValue = 0;
-    cout << "Добавить элемент в копию: ";
-    cin >> addValue;
+    int addValue = readInt("Добавить элемент в копию: ");
     copied.pushBack(addValue);
+    cout << "Копия после добавления:\n";
+    copied.printForward();
 
-    int findValue = 0;
-    cout << "Поиск в копии: ";
-    cin >> findValue;
+    int findValue = readInt("Поиск в копии: ");
     cout << (copied.contains(findValue) ? "Найдено\n" : "Не найдено\n");
 
-    int delValue = 0;
-    cout << "Удалить из копии: ";
-    cin >> delValue;
+    int delValue = readInt("Удалить из копии: ");
     cout << (copied.removeFirstValue(delValue) ? "Удалено\n" : "Не найдено\n");
+    cout << "Копия после удаления:\n";
     copied.printForward();
 
     list.printBetweenMinMax();
@@ -645,7 +724,6 @@ void ListWork41() {
 
 // запуск задания 3 (ListWork63)
 void ListWork63() {
-    using namespace std;
     DoublyList list;
 
     if (!fillDoublyByMode(list, 1)) {
@@ -656,9 +734,7 @@ void ListWork63() {
     cout << "Исходный список:\n";
     list.printForward();
 
-    int findValue = 0;
-    cout << "Поиск значения: ";
-    cin >> findValue;
+    int findValue = readInt("Поиск значения: ");
     cout << (list.contains(findValue) ? "Найдено\n" : "Не найдено\n");
 
     string outFile;
@@ -678,11 +754,93 @@ void ListWork63() {
 // запуск задания 4 (ListWork46)
 void ListWork46() {
     using namespace std;
-    cout << "Задание 4 (ListWork46) пока не реализовано\n";
+
+    DoublyList list;
+
+    // можно пустой список, по условию это допустимо
+    if (!fillDoublyByMode(list, 0)) {
+        cout << "Ошибка заполнения\n";
+        return;
+    }
+
+    cout << "Исходный линейный список:\n";
+    list.printForward();
+
+    PNode* barrier = list.makeBarrierCycle();
+
+    cout << "После преобразования в циклический с барьером:\n";
+    DoublyList::printBarrierCycle(barrier);
+
+    // освобождаем память
+    DoublyList::clearBarrierCycle(barrier);
 }
 
 // запуск задания 5 (Текстовая задача 4)
 void Text4() {
     using namespace std;
-    cout << "Задание 5 (Текстовая задача 4) пока не реализовано\n";
+
+    string s;
+    int mode = readIntRange("Ввод строки: 1-клавиатура, 2-файл: ", 1, 2);
+
+    if (mode == 1) {
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Введите строку: ";
+        getline(cin, s);
+    } else {
+        string fileName;
+        cout << "Имя файла: ";
+        cin >> fileName;
+
+        if (!readLineFromFile(fileName, s)) {
+            cout << "Ошибка: не удалось прочитать строку из файла\n";
+            return;
+        }
+
+        cout << "Строка из файла: " << s << '\n';
+    }
+
+    if (!onlyLetters(s)) {
+        cout << "Ошибка: разрешены только буквы\n";
+        return;
+    }
+
+    // Барьерный элемент
+    PNode* barrier = new PNode(0);
+    barrier->next = barrier;
+    barrier->prev = barrier;
+
+    // Строим циклический двусвязный список символов
+    for (char ch : s) {
+        PNode* node = new PNode(static_cast<unsigned char>(ch));
+
+        node->prev = barrier->prev;
+        node->next = barrier;
+        barrier->prev->next = node;
+        barrier->prev = node;
+    }
+
+    // Проверка симметрии
+    bool symmetric = true;
+    PNode* left = barrier->next;
+    PNode* right = barrier->prev;
+
+    for (size_t i = 0; i < s.size() / 2; ++i) {
+        if (left->data != right->data) {
+            symmetric = false;
+            break;
+        }
+        left = left->next;
+        right = right->prev;
+    }
+
+    cout << (symmetric ? "Строка симметрична\n" : "Строка не симметрична\n");
+
+    // Очистка памяти
+    PNode* cur = barrier->next;
+    while (cur != barrier) {
+        PNode* nxt = cur->next;
+        delete cur;
+        cur = nxt;
+    }
+    delete barrier;
 }

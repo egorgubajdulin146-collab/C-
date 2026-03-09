@@ -1,13 +1,23 @@
 #include "funcion.h"
-#include <cstdlib>
-#include <ctime>
+
 #include <iostream>
+#include <limits>
 
 using namespace std;
 
-int main() {
-    srand(static_cast<unsigned int>(time(nullptr)));
+static int readMenuChoice() {
+    int x;
+    while (true) {
+        cout << "Выбор: ";
+        if (cin >> x && x >= 0 && x <= 5) return x;
 
+        cout << "Ошибка ввода. Введите число от 0 до 5.\n";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+}
+
+int main() {
     int choice = -1;
 
     do {
@@ -18,8 +28,8 @@ int main() {
         cout << "4 - ListWork46\n";
         cout << "5 - Текстовая задача 4\n";
         cout << "0 - Выход\n";
-        cout << "Выбор: ";
-        cin >> choice;
+
+        choice = readMenuChoice();
 
         switch (choice) {
             case 1:
@@ -39,9 +49,6 @@ int main() {
                 break;
             case 0:
                 cout << "Выход\n";
-                break;
-            default:
-                cout << "Неверный пункт\n";
                 break;
         }
     } while (choice != 0);
