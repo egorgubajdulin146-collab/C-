@@ -7,10 +7,11 @@
 #include <cstdlib>
 #include <cctype>
 
-using namespace std;
+
 
 // проверить и считать целое число
-static int readInt(const string& prompt) {
+static int readInt(const std::string& prompt) {
+    using namespace std;
     while (true) {
         cout << prompt;
         string s;
@@ -28,7 +29,8 @@ static int readInt(const string& prompt) {
 
 
 // проверить и считать целое число не меньше minVal
-static int readIntMin(const string& prompt, int minVal) {
+static int readIntMin(const std::string& prompt, int minVal) {
+    using namespace std;
     while (true) {
         int x = readInt(prompt);
         if (x >= minVal) return x;
@@ -37,7 +39,8 @@ static int readIntMin(const string& prompt, int minVal) {
 }
 
 // проверить и считать целое число в диапазоне [l; r]
-static int readIntRange(const string& prompt, int l, int r) {
+static int readIntRange(const std::string& prompt, int l, int r) {
+    using namespace std;
     while (true) {
         int x = readInt(prompt);
         if (x >= l && x <= r) return x;
@@ -174,6 +177,7 @@ void CircularList::clear() {
 
 // вывести CircularList
 void CircularList::print() const {
+    using namespace std;
     cout << "list: ";
     if (!head) {
         cout << "nullptr\n";
@@ -201,7 +205,8 @@ bool CircularList::fillKeyboard(int minCount) {
 }
 
 // заполнить CircularList из файла
-bool CircularList::fillFile(const string& fileName, int minCount) {
+bool CircularList::fillFile(const std::string& fileName, int minCount) {
+    using namespace std;
     clear();
 
     ifstream fin(fileName);
@@ -220,6 +225,7 @@ bool CircularList::fillFile(const string& fileName, int minCount) {
 
 // заполнить CircularList случайными числами
 bool CircularList::fillRandom(int n, int left, int right, int minCount) {
+    using namespace std;
     clear();
 
     if (n < minCount) return false;
@@ -240,7 +246,8 @@ bool CircularList::fillRandom(int n, int left, int right, int minCount) {
 }
 
 // ListWork69: вывести в файл с шагом k и удалить элементы
-bool CircularList::writeByStepAndErase(int k, const string& outFileName) {
+bool CircularList::writeByStepAndErase(int k, const std::string& outFileName) {
+    using namespace std;
     if (k <= 0) return false;
 
     ofstream fout(outFileName);
@@ -386,6 +393,7 @@ void DoublyList::clear() {
 
 // вывести DoublyList слева направо
 void DoublyList::printForward() const {
+    using namespace std;
     cout << "list forward: ";
     for (PNode* p = head; p != nullptr; p = p->next) {
         cout << p->data << ' ';
@@ -395,6 +403,7 @@ void DoublyList::printForward() const {
 
 // вывести DoublyList справа налево
 void DoublyList::printBackward() const {
+    using namespace std;
     cout << "list backward: ";
     for (PNode* p = tail; p != nullptr; p = p->prev) {
         cout << p->data << ' ';
@@ -415,7 +424,8 @@ bool DoublyList::fillKeyboard(int minCount) {
 }
 
 // заполнить DoublyList из файла
-bool DoublyList::fillFile(const string& fileName, int minCount) {
+bool DoublyList::fillFile(const std::string& fileName, int minCount) {
+    using namespace std;
     clear();
 
     ifstream fin(fileName);
@@ -434,6 +444,7 @@ bool DoublyList::fillFile(const string& fileName, int minCount) {
 
 // заполнить DoublyList случайными числами
 bool DoublyList::fillRandom(int n, int left, int right, int minCount) {
+    using namespace std;
     clear();
 
     if (n < minCount) return false;
@@ -455,6 +466,7 @@ bool DoublyList::fillRandom(int n, int left, int right, int minCount) {
 
 // ListWork41: вывести min, max и элементы между ними
 void DoublyList::printBetweenMinMax() const {
+    using namespace std;
     if (!head || !head->next) {
         cout << "Список слишком короткий\n";
         return;
@@ -499,7 +511,8 @@ void DoublyList::printBetweenMinMax() const {
 }
 
 // ListWork63: вывести в файл в обратном порядке и удалить все
-bool DoublyList::writeReverseAndErase(const string& outFileName) {
+bool DoublyList::writeReverseAndErase(const std::string& outFileName) {
+    using namespace std;
     ofstream fout(outFileName);
     if (!fout.is_open()) return false;
 
@@ -548,7 +561,7 @@ PNode* DoublyList::makeBarrierCycle(){
 }
 
 // вывести циклический список с барьером
-void DoublyList::printBarrierCycle(PNode* barrier){
+void DoublyList::printBarrierCycle(PNode* barrier) {
     using namespace std;
     if (!barrier) {
         cout << "barrier = nullptr\n";
@@ -556,20 +569,15 @@ void DoublyList::printBarrierCycle(PNode* barrier){
     }
 
     cout << "barrier = " << barrier << " (data = " << barrier->data << ")\n";
-    cout << "cycle: |B| ";
+    cout << "cycle: " << barrier->data << ' ';
 
     PNode* cur = barrier->next;
-    if (cur == barrier) {
-        cout << "-> |B|\n";
-        return;
-    }
-
     while (cur != barrier) {
         cout << "-> " << cur->data << ' ';
         cur = cur->next;
     }
 
-    cout << "-> |B|\n";
+    cout << "-> " << barrier->data << '\n';
 }
 
 // очистить циклический список с барьером
@@ -589,6 +597,7 @@ void DoublyList::clearBarrierCycle(PNode*& barrier) {
 
 // выбрать способ заполнения CircularList
 static bool fillCircularByMode(CircularList& list, int minCount) {
+    using namespace std;
     int mode = readIntRange("Заполнение: 1-клавиатура, 2-файл, 3-случайно: ", 1, 3);
 
     if (mode == 1) return list.fillKeyboard(minCount);
@@ -608,6 +617,7 @@ static bool fillCircularByMode(CircularList& list, int minCount) {
 
 // выбрать способ заполнения DoublyList
 static bool fillDoublyByMode(DoublyList& list, int minCount) {
+    using namespace std;
     int mode = readIntRange("Заполнение: 1-клавиатура, 2-файл, 3-случайно: ", 1, 3);
 
     if (mode == 1) return list.fillKeyboard(minCount);
@@ -625,16 +635,18 @@ static bool fillDoublyByMode(DoublyList& list, int minCount) {
     return list.fillRandom(n, l, r, minCount);
 }
 
-bool onlyLetters(const string& s) {
+bool onlyLetters(const std::string& s) {
+    using namespace std;
     if (s.empty()) return false;
     for (char ch : s) {
-        if (!isalpha(static_cast<unsigned char>(ch))) return false;
+        if (!isalnum(static_cast<unsigned char>(ch))) return false;
     }
     return true;
 }
 
 // считать строку из файла (первая непустая строка)
-static bool readLineFromFile(const string& fileName, string& s) {
+static bool readLineFromFile(const std::string& fileName, std::string& s) {
+    using namespace std;
     ifstream fin(fileName);
     if (!fin.is_open()) return false;
 
@@ -648,6 +660,7 @@ static bool readLineFromFile(const string& fileName, string& s) {
 
 // запуск задания 1 (ListWork69)
 void ListWork69() {
+    using namespace std;
     CircularList list;
 
     if (!fillCircularByMode(list, 1)) {
@@ -692,6 +705,7 @@ void ListWork69() {
 
 // запуск задания 2 (ListWork41)
 void ListWork41() {
+    using namespace std;
     DoublyList list;
 
     if (!fillDoublyByMode(list, 2)) {
@@ -724,6 +738,7 @@ void ListWork41() {
 
 // запуск задания 3 (ListWork63)
 void ListWork63() {
+    using namespace std;
     DoublyList list;
 
     if (!fillDoublyByMode(list, 1)) {

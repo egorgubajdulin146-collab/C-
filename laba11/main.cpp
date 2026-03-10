@@ -3,9 +3,10 @@
 #include <iostream>
 #include <limits>
 
-using namespace std;
+
 
 static int readMenuChoice() {
+    using namespace std;
     int x;
     while (true) {
         cout << "Выбор: ";
@@ -18,6 +19,7 @@ static int readMenuChoice() {
 }
 
 int main() {
+    using namespace std;
     int choice = -1;
 
     do {
