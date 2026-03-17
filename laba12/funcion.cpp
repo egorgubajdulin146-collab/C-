@@ -222,8 +222,8 @@ void STL2Seq11() {
     L.insert(
         pos,
         //обход с конца
-        reverse_iterator<vector<int>::iterator>(last),
-        reverse_iterator<vector<int>::iterator>(first)
+        V.rbegin() + (V.size() - 5),
+        V.rend()
     );
 
     cout << "L после вставки: ";
@@ -254,12 +254,10 @@ void STL2Seq27() {
     cout << '\n';
 
     // Удаляем элементы с нечетными номерами: 1, 3, 5, ...
-    for (vector<int>::iterator it = V.begin(); it != V.end(); ) {
+    for (vector<int>::iterator it = V.begin(); it != V.end(); ++it) {
         it = V.erase(it);
 
         if (it == V.end()) break;
-
-        ++it;
     }
 
     cout << "V после удаления: ";
