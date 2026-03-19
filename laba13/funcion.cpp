@@ -13,6 +13,27 @@
 #include <deque>
 #include <numeric>
 
+// Функтор для STL3Alg19: выдает N, N-1, ..., 1
+struct DecGenerator {
+    int* cur;
+
+    explicit DecGenerator(int& value) : cur(&value) {}
+
+    int operator()() {
+        --(*cur);
+        return *cur;
+    }
+};
+
+// Функтор для STL3Alg61: из пары соседних слов делает "первая буква левого + последняя буква правого"
+struct PairWordBuilder {
+    std::string operator()(const std::string& right, const std::string& left) const {
+        std::string s;
+        s += left.front();
+        s += right.back();
+        return s;
+    }
+};
 
 
 
@@ -344,10 +365,7 @@ void STL3Alg19() {
 
     int cur = N + 1;
 
-    auto gen =[&cur](){
-        cur--;
-        return cur;
-    };
+    DecGenerator gen(cur);
 
     generate_n(front_inserter(D), N, gen);
     cur = N + 1;
@@ -417,15 +435,10 @@ void STL3Alg61() {
     cout << '\n';
 
     adjacent_difference(
-        L.begin(),
-        L.end(),
-        back_inserter(D),
-        [](const string& right, const string& left) {
-            string s;
-            s += left.front();
-            s += right.back();
-            return s;
-        }
+    L.begin(),
+    L.end(),
+    back_inserter(D),
+    PairWordBuilder()
     );
 
     // adjacent_difference первым элементом копирует первый элемент списка,
