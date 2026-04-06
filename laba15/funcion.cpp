@@ -2,23 +2,31 @@
 
 #include <iostream>
 
+using namespace std;
 
-// Конструктор Name
-Name::Name(const std::string& s, const std::string& f, const std::string& p)
-    : surname(s), firstName(f), patronymic(p) {
+// Конструктор Name без параметров
+Name::Name() : firstName(""), patronymic(""), surname("") {
+}
+
+// Конструктор Name только с именем
+Name::Name(const string& first) : firstName(first), patronymic(""), surname("") {
+}
+
+// Конструктор Name с именем и фамилией
+Name::Name(const string& first, const string& sur)
+    : firstName(first), patronymic(""), surname(sur) {
+}
+
+// Конструктор Name с именем, отчеством и фамилией
+Name::Name(const string& first, const string& patr, const string& sur)
+    : firstName(first), patronymic(patr), surname(sur) {
 }
 
 // Преобразовать Name в строку
-std::string Name::toString() const {
-    using namespace std;
+string Name::toString() const {
     string result;
 
-    if (!surname.empty()) {
-        result += surname;
-    }
-
     if (!firstName.empty()) {
-        if (!result.empty()) result += " ";
         result += firstName;
     }
 
@@ -27,33 +35,36 @@ std::string Name::toString() const {
         result += patronymic;
     }
 
+    if (!surname.empty()) {
+        if (!result.empty()) result += " ";
+        result += surname;
+    }
+
     return result;
 }
 
 // Вывести Name
 void Name::print() const {
-    using namespace std;
     cout << toString() << endl;
 }
 
 // Конструктор Person
-Person::Person(const std::string& n, int h)
+Person::Person(const string& n, int h)
     : name(n), height(h) {
 }
 
 // Преобразовать Person в строку
-std::string Person::toString() const {
-    return name + ", рост: " + std::to_string(height);
+string Person::toString() const {
+    return name + ", рост: " + to_string(height);
 }
 
 // Вывести Person
 void Person::print() const {
-    using namespace std;
     cout << toString() << endl;
 }
 
 // Конструктор Department
-Department::Department(const std::string& t)
+Department::Department(const string& t)
     : title(t), boss(nullptr) {
 }
 
@@ -68,7 +79,7 @@ void Department::addEmployee(Employee* e) {
 }
 
 // Получить название отдела
-std::string Department::getTitle() const {
+string Department::getTitle() const {
     return title;
 }
 
@@ -77,13 +88,13 @@ Employee* Department::getBoss() const {
     return boss;
 }
 
-// Получить список сотрудников
-const std::vector<Employee*>& Department::getWorkers() const {
+// Получить сотрудников
+const vector<Employee*>& Department::getWorkers() const {
     return workers;
 }
 
 // Преобразовать Department в строку
-std::string Department::toString() const {
+string Department::toString() const {
     if (boss == nullptr) {
         return title + ", начальник не назначен";
     }
@@ -93,13 +104,11 @@ std::string Department::toString() const {
 
 // Вывести Department
 void Department::print() const {
-    using namespace std;
     cout << toString() << endl;
 }
 
-// Вывести всех сотрудников отдела
+// Вывести сотрудников отдела
 void Department::printWorkers() const {
-    using namespace std;
     cout << "Сотрудники отдела " << title << ": ";
 
     for (vector<Employee*>::const_iterator it = workers.begin(); it != workers.end(); ++it) {
@@ -110,7 +119,7 @@ void Department::printWorkers() const {
 }
 
 // Конструктор Employee
-Employee::Employee(const std::string& n, Department* d)
+Employee::Employee(const string& n, Department* d)
     : name(n), department(d) {
     if (department != nullptr) {
         department->addEmployee(this);
@@ -126,17 +135,17 @@ void Employee::setDepartment(Department* d) {
 }
 
 // Получить имя сотрудника
-std::string Employee::getName() const {
+string Employee::getName() const {
     return name;
 }
 
-// Получить отдел сотрудника
+// Получить отдел
 Department* Employee::getDepartment() const {
     return department;
 }
 
 // Преобразовать Employee в строку
-std::string Employee::toString() const {
+string Employee::toString() const {
     if (department == nullptr) {
         return name + " не работает ни в одном отделе";
     }
@@ -155,19 +164,45 @@ std::string Employee::toString() const {
 
 // Вывести Employee
 void Employee::print() const {
-    using namespace std;
     cout << toString() << endl;
+}
+
+// Конструктор Pistol без параметров
+Pistol::Pistol() : bullets(5) {
+}
+
+// Конструктор Pistol с количеством патронов
+Pistol::Pistol(int count) : bullets(count) {
+}
+
+// Преобразовать Pistol в строку
+string Pistol::toString() const {
+    return "Пистолет, патронов: " + to_string(bullets);
+}
+
+// Вывести Pistol
+void Pistol::print() const {
+    cout << toString() << endl;
+}
+
+// Выстрел
+void Pistol::shoot() {
+    if (bullets > 0) {
+        cout << "Бах!" << endl;
+        bullets--;
+    } else {
+        cout << "Клац!" << endl;
+    }
 }
 
 // Задание 1
 void runTask1() {
-    using namespace std;
     cout << "\nЗадание 1\n";
 
     cout << "\nИмена:\n";
-    Name n1("", "Клеопатра", "");
-    Name n2("Пушкин", "Александр", "Сергеевич");
-    Name n3("Маяковский", "Владимир", "");
+    Name n1("Клеопатра");
+    Name n2("Александр", "Сергеевич", "Пушкин");
+    Name n3("Владимир", "Маяковский");
 
     n1.print();
     n2.print();
@@ -185,7 +220,6 @@ void runTask1() {
 
 // Задание 2
 void runTask2() {
-    using namespace std;
     cout << "\nЗадание 2\n";
 
     Department it("IT");
@@ -203,7 +237,6 @@ void runTask2() {
 
 // Задание 3
 void runTask3() {
-    using namespace std;
     cout << "\nЗадание 3\n";
 
     Department it("IT");
@@ -219,7 +252,7 @@ void runTask3() {
     p2.print();
     p3.print();
 
-    cout << "\nПолучаем отдел по сотруднику Петров:\n";
+    cout << "\nПо ссылке на сотрудника Петров получаем список отдела:\n";
     Department* dep = p1.getDepartment();
 
     if (dep != nullptr) {
@@ -230,12 +263,31 @@ void runTask3() {
 
 // Задание 4
 void runTask4() {
-    using namespace std;
-    cout << "\nЗадание 4 пока не реализовано.\n";
+    cout << "\nЗадание 4\n";
+
+    Name n1("Клеопатра");
+    Name n2("Александр", "Сергеевич", "Пушкин");
+    Name n3("Владимир", "Маяковский");
+    Name n4("Христофор", "Бонифатьевич");
+
+    n1.print();
+    n2.print();
+    n3.print();
+    n4.print();
 }
 
 // Задание 5
 void runTask5() {
-    using namespace std;
-    cout << "\nЗадание 5 пока не реализовано.\n";
+    cout << "\nЗадание 5\n";
+
+    Pistol gun(3);
+    gun.print();
+
+    gun.shoot();
+    gun.shoot();
+    gun.shoot();
+    gun.shoot();
+    gun.shoot();
+
+    gun.print();
 }

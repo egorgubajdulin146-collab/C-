@@ -3,10 +3,10 @@
 #include <iostream>
 #include <limits>
 
-using namespace std;
 
 // Считать пункт меню
 static int readMenuChoice() {
+    using namespace std;
     while (true) {
         cout << "Выбор: ";
         int x;
@@ -22,10 +22,11 @@ static int readMenuChoice() {
 }
 
 int main() {
+    using namespace std;
     int choice;
 
     do {
-        cout << "\nЛаба 15, вариант 4\n";
+        cout << "\n\tЛаба 15, вариант 4\n";
         cout << "1 - Задание 1\n";
         cout << "2 - Задание 2\n";
         cout << "3 - Задание 3\n";

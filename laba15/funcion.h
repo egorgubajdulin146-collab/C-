@@ -6,12 +6,15 @@
 
 class Name {
 private:
-    std::string surname;
     std::string firstName;
     std::string patronymic;
+    std::string surname;
 
 public:
-    Name(const std::string& s = "", const std::string& f = "", const std::string& p = "");
+    Name();
+    Name(const std::string& first);
+    Name(const std::string& first, const std::string& sur);
+    Name(const std::string& first, const std::string& patr, const std::string& sur);
 
     std::string toString() const;
     void print() const;
@@ -67,6 +70,19 @@ public:
 
     std::string toString() const;
     void print() const;
+};
+
+class Pistol {
+private:
+    int bullets;
+
+public:
+    Pistol();
+    Pistol(int count);
+
+    std::string toString() const;
+    void print() const;
+    void shoot();
 };
 
 void runTask1();
