@@ -1,6 +1,8 @@
 #ifndef FUNCION_H
 #define FUNCION_H
 
+#include <vector>
+
 class Check{
 public:
     static int readInt(const char* text);
@@ -8,22 +10,31 @@ public:
     static int readIntRange(const char* text, int left, int right);
 };
 
-class Node{
-public:
-    int data;
-    Node* left;
-    Node* right;
-
-    Node(int value);
-};
-
 class BinaryTree{
 private:
+    class Node{
+    private:
+        int data;
+        Node* left;
+        Node* right;
+
+    public:
+        Node(int value);
+
+        int getData() const;
+        Node* getLeft() const;
+        Node* getRight() const;
+
+        void setData(int value);
+        void setLeft(Node* p);
+        void setRight(Node* p);
+    };
+
     Node* root;
 
     void clear(Node* p);
     void insert(Node*& p, int value);
-    void printTree(Node* p, int space) const;
+    void buildByLevels(const std::vector<int>& values);
 
     void printLeaves(Node* p) const;
     int countLeaves(Node* p) const;
@@ -38,9 +49,9 @@ public:
     void clear();
     void insert(int value);
 
-    bool fillKeyboard();
-    bool fillFile();
-    bool fillRandom();
+    bool fillKeyboardBinary();
+    bool fillFileBinary();
+    bool fillRandomBinary();
 
     void print() const;
 

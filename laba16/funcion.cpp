@@ -7,12 +7,12 @@
 #include <limits>
 #include <queue>
 #include <iomanip>
+#include <vector>
 
-
-using namespace std;
 
 // Считать целое число
 int Check::readInt(const char* text){
+    using namespace std;
     int x;
     while(true){
         cout << text;
@@ -29,6 +29,7 @@ int Check::readInt(const char* text){
 
 // Считать целое число не меньше minValue
 int Check::readIntMin(const char* text, int minValue) {
+    using namespace std;
     while (true) {
         int x = readInt(text);
 
@@ -42,6 +43,7 @@ int Check::readIntMin(const char* text, int minValue) {
 
 // Считать целое число в диапазоне
 int Check::readIntRange(const char* text, int left, int right) {
+    using namespace std;
     while (true) {
         int x = readInt(text);
 
@@ -54,7 +56,37 @@ int Check::readIntRange(const char* text, int left, int right) {
 }
 
 // Создать узел
-Node::Node(int value) : data(value), left(nullptr), right(nullptr) {
+BinaryTree::Node::Node(int value) : data(value), left(nullptr), right(nullptr) {
+}
+
+// Получить значение узла
+int BinaryTree::Node::getData() const {
+    return data;
+}
+
+// Получить левый потомок
+BinaryTree::Node* BinaryTree::Node::getLeft() const {
+    return left;
+}
+
+// Получить правый потомок
+BinaryTree::Node* BinaryTree::Node::getRight() const {
+    return right;
+}
+
+// Изменить значение узла
+void BinaryTree::Node::setData(int value) {
+    data = value;
+}
+
+// Изменить левый потомок
+void BinaryTree::Node::setLeft(BinaryTree::Node* p) {
+    left = p;
+}
+
+// Изменить правый потомок
+void BinaryTree::Node::setRight(BinaryTree::Node* p) {
+    right = p;
 }
 
 // Создать дерево
@@ -67,11 +99,11 @@ BinaryTree::~BinaryTree() {
 }
 
 // Очистить поддерево
-void BinaryTree::clear(Node* p){
+void BinaryTree::clear(BinaryTree::Node* p){
     if(!p) return;
 
-    clear(p->left);
-    clear(p->right);
+    clear(p->getLeft());
+    clear(p->getRight());
     delete p;
 }
 
@@ -82,17 +114,21 @@ void BinaryTree::clear(){
 }
 
 // Вставить значение в поддерево
-void BinaryTree::insert(Node*& p, int value){
+void BinaryTree::insert(BinaryTree::Node*& p, int value){
     if(!p){
-        p = new Node(value);
+        p = new BinaryTree::Node(value);
         return;
     }
 
-    if(value < p->data){
-        insert(p->left, value);
+    if(value < p->getData()){
+        BinaryTree::Node* left = p->getLeft();
+        insert(left, value);
+        p->setLeft(left);
     }
     else{
-        insert(p->right, value);
+        BinaryTree::Node* right = p->getRight();
+        insert(right, value);
+        p->setRight(right);
     }
 }
 
@@ -101,22 +137,74 @@ void BinaryTree::insert(int value) {
     insert(root, value);
 }
 
-// Заполнить дерево с клавиатуры
-bool BinaryTree::fillKeyboard() {
+// Построить обычное бинарное дерево по уровням слева направо
+void BinaryTree::buildByLevels(const std::vector<int>& values) {
     clear();
 
-    int n = Check::readIntMin("Количество вершин: ", 1);
+    if (values.empty() || values[0] == -1) {
+        return;
+    }
+
+    std::vector<BinaryTree::Node*> nodes(values.size(), nullptr);
+
+    nodes[0] = new BinaryTree::Node(values[0]);
+
+    for (size_t i = 1; i < values.size(); ++i) {
+        size_t parentIndex = (i - 1) / 2;
+
+        if (values[i] != -1 && nodes[parentIndex]) {
+            nodes[i] = new BinaryTree::Node(values[i]);
+        }
+    }
+
+    for (size_t i = 0; i < values.size(); ++i) {
+        if (!nodes[i]) continue;
+
+        size_t leftIndex = 2 * i + 1;
+        size_t rightIndex = 2 * i + 2;
+
+        if (leftIndex < values.size()) {
+            nodes[i]->setLeft(nodes[leftIndex]);
+        }
+
+        if (rightIndex < values.size()) {
+            nodes[i]->setRight(nodes[rightIndex]);
+        }
+    }
+
+    root = nodes[0];
+}
+
+// Заполнить обычное бинарное дерево с клавиатуры
+bool BinaryTree::fillKeyboardBinary() {
+    using namespace std;
+    clear();
+
+    cout << "Ввод обычного бинарного\n";
+    cout << "-1 означает пустую позицию.\n";
+
+    int n = Check::readIntMin("Количество позиций: ", 1);
+    vector<int> values;
+    values.reserve(n);
 
     for (int i = 0; i < n; ++i) {
         int x = Check::readInt("Введите значение: ");
-        insert(x);
+        values.push_back(x);
+    }
+
+    buildByLevels(values);
+
+    if (!root) {
+        cout << "Дерево не должно быть пустым.\n";
+        return false;
     }
 
     return true;
 }
 
-// Заполнить дерево из файла
-bool BinaryTree::fillFile() {
+// Заполнить обычное бинарное дерево из файла
+bool BinaryTree::fillFileBinary() {
+    using namespace std;
     clear();
 
     string fileName;
@@ -129,28 +217,36 @@ bool BinaryTree::fillFile() {
     }
 
     int n;
-    if (!(fin >> n) || n <= 0) {
+    if (!(fin >> n) || n < 1) {
         return false;
     }
 
+    vector<int> values;
+    values.reserve(n);
+
     for (int i = 0; i < n; ++i) {
         int x;
-
         if (!(fin >> x)) {
             return false;
         }
+        values.push_back(x);
+    }
 
-        insert(x);
+    buildByLevels(values);
+
+    if (!root) {
+        return false;
     }
 
     return true;
 }
 
-// Заполнить дерево случайно
-bool BinaryTree::fillRandom() {
+// Заполнить обычное бинарное дерево случайно
+bool BinaryTree::fillRandomBinary() {
+    using namespace std;
     clear();
 
-    int n = Check::readIntMin("Количество вершин: ", 1);
+    int n = Check::readIntMin("Количество позиций: ", 1);
     int left = Check::readInt("Левая граница: ");
     int right = Check::readInt("Правая граница: ");
 
@@ -166,48 +262,39 @@ bool BinaryTree::fillRandom() {
         seeded = true;
     }
 
+    vector<int> values;
+    values.reserve(n);
+
     cout << "Сгенерировано: ";
     for (int i = 0; i < n; ++i) {
         int x = left + rand() % (right - left + 1);
+        values.push_back(x);
         cout << x << ' ';
-        insert(x);
     }
     cout << '\n';
 
+    buildByLevels(values);
     return true;
 }
 
 // Вывести пробелы
 static void printSpaces(int count) {
+    using namespace std;
     for (int i = 0; i < count; ++i) {
         cout << ' ';
     }
 }
 
-// Вывести дерево обычным видом сверху вниз
-void BinaryTree::printTree(Node* p, int space) const {
-    if(!p) return;
-
-    const int step = 5;
-    printTree(p->right, space + step);
-
-    for(int i = 0; i < space; i++){
-        cout << ' ';
-    }
-    cout << p->data << endl;
-    printTree(p->left, space + step);
-
-}
-
 // Вывести дерево сверху вниз
 void BinaryTree::print() const {
+    using namespace std;
     if (!root) {
         cout << "Дерево пустое\n";
         return;
     }
 
     int h = height(root);
-    queue<Node*> q;
+    queue<BinaryTree::Node*> q;
     q.push(root);
 
     for (int level = 0; level < h; ++level) {
@@ -218,13 +305,13 @@ void BinaryTree::print() const {
         printSpaces(firstSpaces * 2);
 
         for (int i = 0; i < nodesCount; ++i) {
-            Node* cur = q.front();
+            BinaryTree::Node* cur = q.front();
             q.pop();
 
             if (cur) {
-                cout << setw(2) << cur->data;
-                q.push(cur->left);
-                q.push(cur->right);
+                cout << setw(2) << cur->getData();
+                q.push(cur->getLeft());
+                q.push(cur->getRight());
             } else {
                 cout << "  ";
                 q.push(nullptr);
@@ -240,34 +327,35 @@ void BinaryTree::print() const {
 
 
 // Вывести листья слева направо
-void BinaryTree::printLeaves(Node* p) const {
+void BinaryTree::printLeaves(BinaryTree::Node* p) const {
+    using namespace std;
     if (!p) return;
 
-    printLeaves(p->left);
+    printLeaves(p->getLeft());
 
-    if(!p->left && !p->right){
-        cout << p->data << ' ';
+    if(!p->getLeft() && !p->getRight()){
+        cout << p->getData() << ' ';
     }
 
-    printLeaves(p->right);
+    printLeaves(p->getRight());
 }
 
 // Посчитать листья
-int BinaryTree::countLeaves(Node* p) const {
+int BinaryTree::countLeaves(BinaryTree::Node* p) const {
     if (!p) return 0;
 
-    if(!p->left && !p->right){
+    if(!p->getLeft() && !p->getRight()){
         return 1;
     }
-    return countLeaves(p->left) + countLeaves(p->right);
+    return countLeaves(p->getLeft()) + countLeaves(p->getRight());
 }
 
 // Высота дерева
-int BinaryTree::height(Node* p) const{
+int BinaryTree::height(BinaryTree::Node* p) const{
     if(!p) return 0;
 
-    int lefth = height(p->left);
-    int righth = height(p->right);
+    int lefth = height(p->getLeft());
+    int righth = height(p->getRight());
 
     if(lefth > righth){
         return lefth + 1;
@@ -277,11 +365,11 @@ int BinaryTree::height(Node* p) const{
 }
 
 // Проверить АВЛ-сбалансированность
-bool BinaryTree::isAvl(Node* p) const{
+bool BinaryTree::isAvl(BinaryTree::Node* p) const{
     if(!p) return true;
 
-    int lefth = height(p->left);
-    int righth = height(p->right);
+    int lefth = height(p->getLeft());
+    int righth = height(p->getRight());
 
     int diff = lefth - righth;
     if(diff < 0) diff = -diff;
@@ -290,11 +378,12 @@ bool BinaryTree::isAvl(Node* p) const{
         return false;
     }
 
-    return isAvl(p->left) && isAvl(p->right);
+    return isAvl(p->getLeft()) && isAvl(p->getRight());
 }
 
 // TreeWork4
 void BinaryTree::runTreeWork4() const {
+    using namespace std;
     cout << "Листья слева направо: ";
     printLeaves(root);
     cout << '\n';
@@ -302,31 +391,35 @@ void BinaryTree::runTreeWork4() const {
 
 // TreeWork13
 void BinaryTree::runTreeWork13() const {
+    using namespace std;
     cout << "Количество листьев: " << countLeaves(root) << '\n';
 }
 
 // TreeWork20
 void BinaryTree::runTreeWork20() const {
+    using namespace std;
     cout << "АВЛ-сбалансированное: " << (isAvl(root) ? "True" : "False") << '\n';
 }
 
 // Заполнить дерево выбранным способом
 static bool fillTreeByMode(BinaryTree& tree) {
+    using namespace std;
     int mode = Check::readIntRange("Заполнение: 1-клавиатура, 2-файл, 3-случайно: ", 1, 3);
 
     if (mode == 1) {
-        return tree.fillKeyboard();
+        return tree.fillKeyboardBinary();
     }
 
     if (mode == 2) {
-        return tree.fillFile();
+        return tree.fillFileBinary();
     }
 
-    return tree.fillRandom();
+    return tree.fillRandomBinary();
 }
 
 // Задание 1
 void TreeWork4() {
+    using namespace std;
     BinaryTree tree;
 
     if (!fillTreeByMode(tree)) {
@@ -345,6 +438,7 @@ void TreeWork4() {
 
 // Задание 2
 void TreeWork13() {
+    using namespace std;
     BinaryTree tree;
 
     if (!fillTreeByMode(tree)) {
@@ -363,6 +457,7 @@ void TreeWork13() {
 
 // Задание 3
 void TreeWork20() {
+    using namespace std;
     BinaryTree tree;
 
     if (!fillTreeByMode(tree)) {
