@@ -206,7 +206,7 @@ void HammingCode::printControlBits() const{
         for(int i = 1; i <= n; ++i){
             if((i & p) && i != p){
                 if(!first){
-                    cout << " xor ";
+                    cout << " + ";
                 }
 
                 cout << code[i];
