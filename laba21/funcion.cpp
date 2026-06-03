@@ -263,13 +263,18 @@ void Graph::printCitiesFromKWithMinTransfers(int k, int l) const{
     using namespace std;
 
     vector<int> dist = bfs(k - 1);
-    int minEdges = l + 1;
     bool found = false;
 
     cout << "Города: ";
 
     for(int i = 0; i < n; ++i){
-        if(i != k - 1 && dist[i] >= minEdges){
+        if(i == k - 1 || dist[i] == -1){
+            continue;
+        }
+
+        int transfers = dist[i] - 1;
+
+        if(transfers >= l){
             cout << i + 1 << ' ';
             found = true;
         }
@@ -281,7 +286,6 @@ void Graph::printCitiesFromKWithMinTransfers(int k, int l) const{
 
     cout << '\n';
 }
-
 // Выбрать способ заполнения графа
 static bool fillGraph3Ways(Graph& g, int maxN, bool directed){
     using namespace std;
