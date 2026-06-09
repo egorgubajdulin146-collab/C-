@@ -1,8 +1,18 @@
 #ifndef FUNCION_H
 #define FUNCION_H
 
+#include <stdexcept>
 #include <string>
-#include <vector>
+
+class ProjectException : public std::runtime_error{
+public:
+    ProjectException(const std::string& message);
+};
+
+class FileReadException : public ProjectException{
+public:
+    FileReadException(const std::string& message);
+};
 
 class Check{
 public:
@@ -55,7 +65,6 @@ public:
     bool empty() const;
     int size() const;
     void print() const;
-    std::vector<int> toVector() const;
 };
 
 class PlayerBase{
@@ -84,7 +93,6 @@ public:
     bool hasCards() const;
     int cardCount() const;
     void printDeck() const;
-    std::vector<int> getCards() const;
 };
 
 class DrunkardGame{
@@ -93,12 +101,12 @@ private:
     Player second;
     int maxMoves;
 
-    bool cardsAreUnique(const std::vector<int>& firstCards, const std::vector<int>& secondCards) const;
+    bool cardsAreUnique(const int firstCards[], const int secondCards[]) const;
 
 public:
     DrunkardGame();
 
-    bool setCards(const std::vector<int>& firstCards, const std::vector<int>& secondCards);
+    bool setCards(const int firstCards[], const int secondCards[]);
     void printPlayers() const;
     void play(bool showProtocol);
 };

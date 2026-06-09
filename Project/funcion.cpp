@@ -6,7 +6,12 @@
 #include <iostream>
 #include <limits>
 #include <string>
-#include <vector>
+
+ProjectException::ProjectException(const std::string& message) : std::runtime_error(message){
+}
+
+FileReadException::FileReadException(const std::string& message) : ProjectException(message){
+}
 
 // Считать целое число
 bool Check::readInt(const char* text, int& value){
@@ -114,10 +119,11 @@ CardQueue::~CardQueue(){
 
 // Конструктор копирования
 CardQueue::CardQueue(const CardQueue& other) : head(nullptr), tail(nullptr), count(0){
-    std::vector<int> values = other.toVector();
+    Node* p = other.head;
 
-    for(size_t i = 0; i < values.size(); ++i){
-        push(Card(values[i]));
+    while(p){
+        push(p->getCard());
+        p = p->getNext();
     }
 }
 
@@ -128,10 +134,11 @@ CardQueue& CardQueue::operator=(const CardQueue& other){
     }
 
     clear();
-    std::vector<int> values = other.toVector();
+    Node* p = other.head;
 
-    for(size_t i = 0; i < values.size(); ++i){
-        push(Card(values[i]));
+    while(p){
+        push(p->getCard());
+        p = p->getNext();
     }
 
     return *this;
@@ -206,19 +213,6 @@ void CardQueue::print() const{
     }
 }
 
-// Перевести очередь в вектор
-std::vector<int> CardQueue::toVector() const{
-    std::vector<int> result;
-    Node* p = head;
-
-    while(p){
-        result.push_back(p->getCard().getValue());
-        p = p->getNext();
-    }
-
-    return result;
-}
-
 // Создать базового игрока
 PlayerBase::PlayerBase(const std::string& name) : name(name){
 }
@@ -272,24 +266,15 @@ void Player::printDeck() const{
     cards.print();
 }
 
-// Получить карты игрока
-std::vector<int> Player::getCards() const{
-    return cards.toVector();
-}
-
 // Создать игру
 DrunkardGame::DrunkardGame() : first("first"), second("second"), maxMoves(1000000){
 }
 
 // Проверить уникальность карт
-bool DrunkardGame::cardsAreUnique(const std::vector<int>& firstCards, const std::vector<int>& secondCards) const{
-    if(firstCards.size() != 5 || secondCards.size() != 5){
-        return false;
-    }
-
+bool DrunkardGame::cardsAreUnique(const int firstCards[], const int secondCards[]) const{
     bool used[10] = {false};
 
-    for(size_t i = 0; i < firstCards.size(); ++i){
+    for(int i = 0; i < 5; ++i){
         int x = firstCards[i];
 
         if(x < 0 || x > 9 || used[x]){
@@ -299,7 +284,7 @@ bool DrunkardGame::cardsAreUnique(const std::vector<int>& firstCards, const std:
         used[x] = true;
     }
 
-    for(size_t i = 0; i < secondCards.size(); ++i){
+    for(int i = 0; i < 5; ++i){
         int x = secondCards[i];
 
         if(x < 0 || x > 9 || used[x]){
@@ -313,7 +298,7 @@ bool DrunkardGame::cardsAreUnique(const std::vector<int>& firstCards, const std:
 }
 
 // Установить карты игроков
-bool DrunkardGame::setCards(const std::vector<int>& firstCards, const std::vector<int>& secondCards){
+bool DrunkardGame::setCards(const int firstCards[], const int secondCards[]){
     if(!cardsAreUnique(firstCards, secondCards)){
         return false;
     }
@@ -321,11 +306,11 @@ bool DrunkardGame::setCards(const std::vector<int>& firstCards, const std::vecto
     first.clear();
     second.clear();
 
-    for(size_t i = 0; i < firstCards.size(); ++i){
+    for(int i = 0; i < 5; ++i){
         first.giveCard(Card(firstCards[i]));
     }
 
-    for(size_t i = 0; i < secondCards.size(); ++i){
+    for(int i = 0; i < 5; ++i){
         second.giveCard(Card(secondCards[i]));
     }
 
@@ -468,10 +453,7 @@ void DrunkardGame::play(bool showProtocol){
 }
 
 // Ручной ввод карт
-static bool fillKeyboard(std::vector<int>& firstCards, std::vector<int>& secondCards){
-    firstCards.clear();
-    secondCards.clear();
-
+static bool fillKeyboard(int firstCards[], int secondCards[]){
     printSmallLine();
     std::cout << "Введите 5 карт первого игрока:\n";
     for(int i = 0; i < 5; ++i){
@@ -479,7 +461,7 @@ static bool fillKeyboard(std::vector<int>& firstCards, std::vector<int>& secondC
         if(!Check::readIntRange("Карта: ", 0, 9, card)){
             return false;
         }
-        firstCards.push_back(card);
+        firstCards[i] = card;
     }
 
     std::cout << "Введите 5 карт второго игрока:\n";
@@ -488,7 +470,7 @@ static bool fillKeyboard(std::vector<int>& firstCards, std::vector<int>& secondC
         if(!Check::readIntRange("Карта: ", 0, 9, card)){
             return false;
         }
-        secondCards.push_back(card);
+        secondCards[i] = card;
     }
 
     printSmallLine();
@@ -496,11 +478,8 @@ static bool fillKeyboard(std::vector<int>& firstCards, std::vector<int>& secondC
 }
 
 // Ввод карт из файла
-static bool fillFile(std::vector<int>& firstCards, std::vector<int>& secondCards){
+static bool fillFile(int firstCards[], int secondCards[]){
     using namespace std;
-
-    firstCards.clear();
-    secondCards.clear();
 
     string fileName;
     cout << "Введите имя файла: ";
@@ -508,38 +487,35 @@ static bool fillFile(std::vector<int>& firstCards, std::vector<int>& secondCards
 
     ifstream fin(fileName);
     if(!fin.is_open()){
-        return false;
+        throw FileReadException("Не удалось открыть файл с картами.");
     }
 
     for(int i = 0; i < 5; ++i){
         int x;
         if(!(fin >> x)){
-            return false;
+            throw FileReadException("В файле недостаточно карт первого игрока.");
         }
-        firstCards.push_back(x);
+        firstCards[i] = x;
     }
 
     for(int i = 0; i < 5; ++i){
         int x;
         if(!(fin >> x)){
-            return false;
+            throw FileReadException("В файле недостаточно карт второго игрока.");
         }
-        secondCards.push_back(x);
+        secondCards[i] = x;
     }
 
     return true;
 }
 
 // Случайная раздача карт
-static bool fillRandom(std::vector<int>& firstCards, std::vector<int>& secondCards){
+static bool fillRandom(int firstCards[], int secondCards[]){
     using namespace std;
 
-    firstCards.clear();
-    secondCards.clear();
-
-    vector<int> deck;
+    int deck[10];
     for(int i = 0; i <= 9; ++i){
-        deck.push_back(i);
+        deck[i] = i;
     }
 
     static bool seeded = false;
@@ -556,18 +532,18 @@ static bool fillRandom(std::vector<int>& firstCards, std::vector<int>& secondCar
     }
 
     for(int i = 0; i < 5; ++i){
-        firstCards.push_back(deck[i]);
+        firstCards[i] = deck[i];
     }
 
     for(int i = 5; i < 10; ++i){
-        secondCards.push_back(deck[i]);
+        secondCards[i - 5] = deck[i];
     }
 
     return true;
 }
 
 // Выбор способа заполнения
-static bool fillCards(std::vector<int>& firstCards, std::vector<int>& secondCards){
+static bool fillCards(int firstCards[], int secondCards[]){
     while(true){
         printFillMenu();
 
@@ -583,14 +559,20 @@ static bool fillCards(std::vector<int>& firstCards, std::vector<int>& secondCard
 
         bool filled = false;
 
-        if(mode == 1){
-            filled = fillKeyboard(firstCards, secondCards);
+        try{
+            if(mode == 1){
+                filled = fillKeyboard(firstCards, secondCards);
+            }
+            else if(mode == 2){
+                filled = fillFile(firstCards, secondCards);
+            }
+            else{
+                filled = fillRandom(firstCards, secondCards);
+            }
         }
-        else if(mode == 2){
-            filled = fillFile(firstCards, secondCards);
-        }
-        else{
-            filled = fillRandom(firstCards, secondCards);
+        catch(const ProjectException& error){
+            std::cout << "Ошибка: " << error.what() << '\n';
+            filled = false;
         }
 
         if(filled){
@@ -605,8 +587,8 @@ static bool fillCards(std::vector<int>& firstCards, std::vector<int>& secondCard
 static bool prepareGame(DrunkardGame& game){
     using namespace std;
 
-    vector<int> firstCards;
-    vector<int> secondCards;
+    int firstCards[5];
+    int secondCards[5];
 
     while(true){
         if(!fillCards(firstCards, secondCards)){
